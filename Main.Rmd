@@ -1,0 +1,18 @@
+---
+title: "A Minimal bookdown document"
+site: bookdown::bookdown_site
+output:
+  bookdown::pdf_document2:
+    toc: yes
+classoption: landscape
+---
+\newpage
+```{r child = 'Datasets.Rmd'}
+```
+\newpage
+```{r child = 'Questions.Rmd'}
+```
+\newpage
+```{r child = 'DatasetRegion.Rmd'}
+```
+\newpage

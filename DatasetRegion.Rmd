@@ -1,0 +1,229 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+classoption: landscape
+---
+# Step 2 Look at the datasets
+
+```{r, include=FALSE}
+path = "/Users/travel_mechtal/Documents/UWE/Portfolio/"
+```
+
+```{r Dataser_Region_Libraries, include=FALSE}
+#---------------------------------------
+# knitr -- create pretty tables for a presentation
+#---------------------------------------
+if(!require(knitr)){install.packages("knitr")}
+library(knitr)
+#---------------------------------------
+# kableExtra -- create pretty tables for a presentation
+#---------------------------------------
+if(!require(kableExtra)){install.packages("kableExtra")}
+library(kableExtra)
+#---------------------------------------
+# tidyverse -- work with objects using %>%, for example
+#---------------------------------------
+if(!require(tidyverse)){install.packages("tidyverse")}
+library(tidyverse)
+#---------------------------------------
+# reshape2 -- use melt
+#---------------------------------------
+if(!require(reshape2)){install.packages("reshape2")}
+library(reshape2)
+#---------------------------------------
+# ggplot2 -- plot
+#---------------------------------------
+if(!require(ggplot2)){install.packages("ggplot2")}
+library(ggplot2)
+#---------------------------------------
+# lubridate -- work with dates
+#---------------------------------------
+if(!require(lubridate)){install.packages("lubridate")}
+library(lubridate)
+#---------------------------------------
+# tinytex -- knit to pdf
+#---------------------------------------
+if(!require(tinytex)){install.packages("tinytex")}
+library(tinytex)
+```
+
+## Region
+
+As we can see on the website, Region metrics are available for regions of England. I am interested in the South West and metrics that start with "New":
+```{r, echo=FALSE}
+region_set <- read.csv(paste(path,"region_2022-01-27.csv",sep=""),
+                         header = TRUE,
+                         sep = ","
+                         )
+
+colnames(region_set)
+```
+We have additional columns. Let's look at them.
+
+areaCode
+```{r, echo=FALSE}
+unique(region_set[,"areaCode"])
+```
+areaName
+```{r, echo=FALSE}
+unique(region_set[,"areaName"])
+```
+areaType
+```{r, echo=FALSE}
+unique(region_set[,"areaType"])
+```
+
+So, we do not need to look at them in the future because these columns are used for filtering that we have already done on the website.
+
+Let's prepare data for the plotting.
+
+```{r, include=FALSE}
+# rename columns
+region_set = rename(region_set, 
+       First = newPeopleVaccinatedFirstDoseByVaccinationDate
+       ,Second = newPeopleVaccinatedSecondDoseByVaccinationDate
+       ,Third=newPeopleVaccinatedThirdInjectionByVaccinationDate
+         )
+# change date's format
+region_set$date <- as.Date(region_set$date,format = '%Y-%m-%d')
+
+# add columns
+MonthYear <- c(c(paste(1:12,2020,sep=".")), c(paste(1:12,2021,sep=".")), c(paste(1:12,2022,sep=".")))
+region_set$MonthYear <- factor(paste(month(region_set$date), year(region_set$date), sep=".")
+                               , levels = MonthYear)
+
+# add the long verstion
+region_set_long <- melt(region_set
+                       , id.vars = c("date", "MonthYear")
+                       , measure.vars = c("First"
+                                          , "Second"
+                                          , "Third"
+                                       )
+                       , variable.name = "Dose"
+                       , value.name = "Count"
+                    )
+```
+
+* Rename columns and columns
+
+```{r, echo=FALSE}
+head(region_set) %>%
+  kable() %>%
+  kable_styling()
+```
+
+* Create long table
+
+```{r, echo=FALSE}
+head(region_set_long) %>%
+    kable() %>%
+  kable_styling()
+```
+
+Let's plot something.
+
+I got my jabs on 8 August 2021, 3 October 2021, 8 January 2022.
+I want to plot the graph that will show the count of jabs after 1 July 2021.
+```{r, echo=FALSE}
+ggplot(data = filter(region_set_long, date >= as.Date("2021-07-01", format = "%Y-%m-%d"))
+       , aes(x=date
+             , y=Count
+             , colour = Dose
+             )
+       ) + 
+geom_point() +
+theme(axis.text.x = element_text(angle=90, hjust = 1)) +
+geom_vline(xintercept = as.Date("2021-08-08", format = "%Y-%m-%d"), color = "red") +
+geom_vline(xintercept = as.Date("2021-10-03", format = "%Y-%m-%d"), color = "red") +
+geom_vline(xintercept = as.Date("2022-01-08", format = "%Y-%m-%d"), color = "red")
+```
+
+The result is not beautiful because of the active growth of the third jabs count at the end of 2021. 
+
+Let's plot them separately.
+
+```{r,echo=FALSE}
+ggplot(data = filter(region_set_long, 
+                     date >= as.Date("2021-07-01", format = "%Y-%m-%d") &
+                       Dose == "First")
+       , aes(x=date
+             , y=Count
+             )
+       ) + 
+geom_point(colour = "blue") +
+theme(axis.text.x = element_text(angle=90, hjust = 1)) +
+geom_vline(xintercept = as.Date("2021-08-08", format = "%Y-%m-%d"), color = "red") +
+  labs(
+    x = "Date"
+    , y = "Count of first doses"
+    , title = "Vaccination in South West"
+    , subtitle = "The first dose"
+    , caption = "More information https://coronavirus.data.gov.uk/details/about-data"
+  )
+```
+
+It is so interesting why the graph is wavy. 
+
+```{r, echo=FALSE}
+ggplot(data = filter(region_set_long, 
+                     date >= as.Date("2021-07-01", format = "%Y-%m-%d") &
+                       Dose == "Second")
+       , aes(x=date
+             , y=Count
+             )
+       ) + 
+geom_point(colour="blue") +
+theme(axis.text.x = element_text(angle=90, hjust = 1)) +
+geom_vline(xintercept = as.Date("2021-10-03", format = "%Y-%m-%d"), color = "red") +
+  labs(
+    x = "Date"
+    , y = "Count of second doses"
+    , title = "Vaccination in England"
+    , subtitle = "The second dose"
+    , caption = "More information https://coronavirus.data.gov.uk/details/about-data"
+  )
+```
+
+
+
+```{r, echo=FALSE}
+ggplot(data = filter(region_set_long, 
+                     date >= as.Date("2021-07-01", format = "%Y-%m-%d") &
+                       Dose == "Third")
+       , aes(x=date
+             , y=Count
+             )
+       ) + 
+geom_point(colour="blue") +
+theme(axis.text.x = element_text(angle=90, hjust = 1)) +
+geom_vline(xintercept = as.Date("2022-01-08", format = "%Y-%m-%d"), color = "red") +
+  labs(
+    x = "Date"
+    , y = "Count of third doses"
+    , title = "Vaccination in England"
+    , subtitle = "The third dose"
+    , caption = "More information https://coronavirus.data.gov.uk/details/about-data"
+  )
+```
+
+We can see when the active phase of vaccination by the third dose started.
+
+Let's calculate the date.
+
+```{r, include=FALSE}
+region_set_long_agg <- region_set_long[,c("MonthYear", "Dose", "Count")] %>%
+group_by(MonthYear, Dose) %>%
+summarise(Count=sum(Count), na.rm = TRUE)
+```
+
+```{r, echo=FALSE}
+ggplot(data = region_set_long_agg, 
+aes(x=MonthYear, 
+y=Count, 
+fill = Dose
+)
+) +
+geom_col(position = "dodge") +
+theme(axis.text.x = element_text(angle=90, hjust = 1))
+```
