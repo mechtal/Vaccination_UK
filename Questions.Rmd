@@ -1,10 +1,17 @@
 ---
 output:
-  pdf_document: default
-  html_document: default
+  bookdown::pdf_document2: default
 classoption: landscape
 ---
 # Step 2 Ask something
+
+```{r, include=FALSE}
+#---------------------------------------
+# pander -- beautiful string from chunk
+#---------------------------------------
+if(!require(pander)){install.packages("pander")}
+library(pander)
+```
 
 I live in Bristol. What do I know about Bristol? 
 
@@ -14,7 +21,10 @@ I live in Bristol. What do I know about Bristol?
 
 So, I am interested in data about the UK, England, South West, and Bristol. 
 
-**Question 0:** Are there dependencies between academic year' events and vaccination waves? Does the vaccination depend on holidays?
+**Question 0:** 
+```{r q0, render=pander::pander, echo=FALSE}
+"Are there dependencies between academic year events and vaccination waves? Does the vaccination depend on holidays?"
+```
 
 I was vaccinated by 
 
@@ -22,11 +32,19 @@ I was vaccinated by
 * the second dose on 3 October 2021,
 * the booster dose on 8 January 2022.
 
-**Question 1:** How many people got their jabs with me?
+**Question 1:**
+```{r q1, render=pander::pander, echo=FALSE}
+"How many people got their jabs with me?"
+```
 
 I got the first and the second jabs on Sunday. There were fewer people in the vaccination centre. When I got the third jab on Saturday, there was a big queue. 
 
-**Question 2:** When do people prefer to get a jab: weekdays or weekends/
-Saturdays or Sundays?
+**Question 2:** 
+```{r q2, render=pander::pander, echo=FALSE}
+"When do people prefer to get a jab: weekdays or weekends/Saturdays or Sundays?"
+```
 
-**Question 3:** Is there something illogical in data? 
+**Question 3:** 
+```{r q3, render=pander::pander, echo=FALSE}
+"Is there something illogical in data?"
+```

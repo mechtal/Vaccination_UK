@@ -1,7 +1,6 @@
 ---
 output:
-  pdf_document: default
-  html_document: default
+  bookdown::pdf_document2: default
 classoption: landscape
 ---
 # Step 1 Find dataset

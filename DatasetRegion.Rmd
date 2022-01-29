@@ -1,7 +1,6 @@
 ---
 output:
-  pdf_document: default
-  html_document: default
+  bookdown::pdf_document2: default
 classoption: landscape
 ---
 # Step 2 Look at the datasets
@@ -46,6 +45,11 @@ library(lubridate)
 #---------------------------------------
 if(!require(tinytex)){install.packages("tinytex")}
 library(tinytex)
+#---------------------------------------
+# pander -- beautiful string from chunk
+#---------------------------------------
+if(!require(pander)){install.packages("pander")}
+library(pander)
 ```
 
 ## Region
@@ -123,8 +127,10 @@ head(region_set_long) %>%
 
 Let's plot something.
 
-I got my jabs on 8 August 2021, 3 October 2021, 8 January 2022.
-I want to plot the graph that will show the count of jabs after 1 July 2021.
+### Question 0
+```{r ref0, ref.label='q0', render=pander::pander, echo=FALSE}
+```
+
 ```{r, echo=FALSE}
 ggplot(data = filter(region_set_long, date >= as.Date("2021-07-01", format = "%Y-%m-%d"))
        , aes(x=date
