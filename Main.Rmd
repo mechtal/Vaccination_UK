@@ -1,5 +1,5 @@
 ---
-title: "A Minimal bookdown document"
+title: "Vaccination in the UK"
 site: bookdown::bookdown_site
 output:
   bookdown::pdf_document2:
