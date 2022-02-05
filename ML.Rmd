@@ -5,25 +5,22 @@ classoption: landscape
 ---
 # Step 4 Machine learning
 
-```{r, include=FALSE}
+## Step 0: Look at and Modify the dataset
+So, I am curious. Can I predict vaccination data?
+
+```{r python, include=FALSE}
+# Setting for using python
 library(tidyverse)
 library(reticulate)
 use_python("/Users/travel_mechtal/opt/anaconda3/bin/python")
 use_condaenv("base", required = TRUE)
+
+# if I need a new module
+#py_install("ModuleName")
+# I already installed: pandas, networkx, typing_extensions, joblib, seaborn, scikit-learn
 ```
 
-```{r, include=FALSE}
-#py_run_string("import os as os")
-#py_run_string("os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = '/Users/travel_mechtal/opt/Anaconda3/Library/plugins/platforms'")
-#py_install("pandas")
-#py_install("networkx")
-#py_install("typing_extensions")
-#py_install("joblib")
-#py_install("seaborn")
-#py_install("scikit-learn")
-```
-
-```{python, include=FALSE}
+```{python python_libraries, include=FALSE}
 # work with dataframes
 import pandas as pd
 # work with dates
@@ -43,148 +40,124 @@ from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import RandomForestRegressor
 ```
 
-## Step 0: Read the dataset
+```{r ML_r_libraries, include=FALSE}
+#---------------------------------------
+# ggplot2 -- plot
+#---------------------------------------
+if(!require(ggplot2)){install.packages("ggplot2")}
+library(ggplot2)
+#---------------------------------------
+# reshape2 -- use melt
+#---------------------------------------
+if(!require(reshape2)){install.packages("reshape2")}
+library(reshape2)
+```
 
-Read csv-file
-
-```{python, include=FALSE}
+```{python read_data, include=FALSE}
+# read file
 path = "/Users/travel_mechtal/Documents/UWE/Portfolio/"
 data=pd.read_csv(path + "region_2022-01-27.csv", index_col="date", parse_dates=True)
-```
 
-Look at the first row of the dataset
-```{r, echo=FALSE} 
-knitr::kable(py$data[1,])
-```
-
-Drop unnecessary columns: areaCode, areaName, areaType.
-
-```{python, include=FALSE}
+# drop unnecessary columns: areaCode, areaName, areaType.
 dataset = data.drop(["areaCode", "areaName", "areaType"], axis=1)
-```
 
-Rename columns
-newPeopleVaccinatedFirstDoseByVaccinationDate -> First, 
-newPeopleVaccinatedSecondDoseByVaccinationDate -> Second, 
-newPeopleVaccinatedThirdInjectionByVaccinationDate -> Third
-
-```{python, include=FALSE}
+# rename columns
+# newPeopleVaccinatedFirstDoseByVaccinationDate -> First, 
+# newPeopleVaccinatedSecondDoseByVaccinationDate -> Second, 
+# newPeopleVaccinatedThirdInjectionByVaccinationDate -> Third
 dataset = dataset.rename(columns={"newPeopleVaccinatedFirstDoseByVaccinationDate":"First", 
                                   "newPeopleVaccinatedSecondDoseByVaccinationDate":"Second", 
                                   "newPeopleVaccinatedThirdInjectionByVaccinationDate":"Third"})
+# Replace Na values                                  
+dataset = dataset.fillna(0)   
 ```
 
-Replace Na values
-
-```{python, include=FALSE}
-dataset = dataset.fillna(0)
+I will work with the South West's vaccination data.
+```{r DataRegions, echo=FALSE} 
+knitr::kable(py$dataset[1:5,])
 ```
 
-Look at the final version of the dataset
+```{python DataRegions_all_years, fig.align = "center", echo=FALSE}
+plt.figure(figsize=(20,20))
+sns.heatmap(data=
+            dataset.sort_index())
+```
+As we can see, there are waves. So, the count of jabs depends on dates.
 
-```{r, echo=FALSE} 
-knitr::kable(py$dataset[1,])
-```
-```
-
-```{python}
-plt.figure(figsize=(14,8))
-sns.heatmap(data=dataset.loc[[date for date in dataset.index if date.year==2020],:].sort_index())
-```
-```{python}
-plt.figure(figsize=(14,8))
-sns.heatmap(data=dataset.loc[[date for date in dataset.index if date.year==2021],:].sort_index())
-```
-```{python}
-plt.figure(figsize=(14,8))
-sns.heatmap(data=dataset.loc[[date for date in dataset.index if date.year==2022],:].sort_index())
-```
-## Step 1: Work with dates. Engineer Datatime Features
-
-Get features:
+Let's get features:
 1) Year
 2) Month
 3) Day
 etc.
 
-```{python}
+```{python DateFeatures, include=FALSE}
 dataset['Year'] = dataset.index.year
-```
-
-```{python}
 dataset['Month'] = dataset.index.month
-```
-
-```{python}
 dataset['Day'] = dataset.index.day
-```
-
-```{python}
 dataset['DayOfYear'] = dataset.index.dayofyear
-```
-
-```{python}
-dataset['WeekOfYear'] = dataset.index.weekofyear
-```
-
-```{python}
 dataset['Weekday'] = dataset.index.weekday
-```
-
-```{python}
-weekdays = {0: 'Monday', 
-            1: 'Tuesday',
-            2: 'Wednesday',
-            3: 'Thursday',
-            4: 'Friday',
-            5: 'Saturday',
-            6: 'Sunday'}
-
-
-
-
-for dose in ["First", "Second", "Third"]:
-    weekday_mean = dataset.groupby('Weekday')[dose].mean()
-    weekday_mean = weekday_mean.rename(index=weekdays)
-    plt.figure(figsize=(14,8))
-    plt.title(dose)
-    sns.barplot(x=weekday_mean.index, y=weekday_mean)
-    plt.xticks(rotation=45)
-```
-
-```{python}
 dataset['Quarter'] = dataset.index.quarter
-```
-
-```{python}
 dataset['IsMonthStart'] = dataset.index.is_month_start
-```
-
-```{python}
 dataset['IsMonthEnd'] = dataset.index.is_month_end
 ```
 
-Look at the dataset with new features
+```{r DataRegions_features, echo=FALSE} 
+knitr::kable(py$dataset[1:5,])
+```
+\newpage
+## Step 1: Explore the dataset
 
-```{python}
-dataset.head()
+### Weekdays
+As you remember, I have a question.
+```{r ref0, ref.label='q2', render=pander::pander, echo=FALSE}
 ```
 
-```{python}
-dataset.info()
+Let's answer.
+```{r, echo=FALSE}
+dataset_weekdays <- 
+  py$dataset %>%
+  group_by(Weekday)%>%
+  summarise(across(c("First", "Second", "Third"), ~ mean(.x, na.rm = TRUE)))
+
+dataset_weekdays$Weekday <- factor(dataset_weekdays$Weekday, labels = c('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'))
+
+dataset_weekdays_long <-
+  melt(dataset_weekdays, id.vars = c("Weekday")
+                       , measure.vars = c("First", "Second", "Third")
+                       , variable.name = "Dose"
+                       , value.name = "Count"
+                    )
+
+ggplot(data = dataset_weekdays_long, 
+       aes(x=Weekday, 
+           y=Count,
+           fill=Count
+           )
+         ) +
+  geom_col(position = "dodge") +
+  geom_vline(xintercept = "Saturday", color = "red") +
+  facet_grid(Dose ~ .)
 ```
 
-**What is about Missing values? 
-For example, there may be only one dose per day.**
+So, most of South West's people prefer to get a jab on Saturdays.
 
-## Step 2: Explore the dataset
+### Missing values
+Calculate a count of dates in the dataset.
+```{python, echo=FALSE}
+len(dataset.index)
+```
+Calculate a count of dates between maximum and minimum dates.
+```{python, echo=FALSE}
+dates = pd.date_range(dataset.index.min(),dataset.index.max(),freq='d')
+len(dates)
+```
+There are no missing dates.
 
-## Step 3: Split sets, train a Machine Learning Model and Evaluate performance
+## Step 2: Split sets, train a Machine Learning Model and Evaluate performance
 
 Define necessary variables
-
-```{python}
-feature_columns = ["Year", "Month", "Day", "Weekday", "IsMonthStart", "IsMonthEnd"]
+```{python, include=FALSE}
+feature_columns = ["Year", "Month", "Day", "DayOfYear", "Weekday", "Quarter", "IsMonthStart", "IsMonthEnd"]
 y_list = ["First", "Second"]
 model_list = ["DecisionTree", "RandomForest"]
 estimators_list = [100,200,300,400,500]
@@ -192,184 +165,113 @@ results = {}
 val_sets = {}
 ```
 
-Prepare sets
-
-```{r}
+Prepare sets and train models using parameters.
+```{r python_functions, include=FALSE}
+# function for preparing sets
 source_python('prepare_sets.py')
-```
-
-Train and evaluate the model
-
-```{r}
+# function for training models
 source_python('train_model.py')
 ```
 
-Train models using parameters
+```{python train_all, include=FALSE}
+# First
+train_f_X, val_f_X, train_f_y, val_f_y = prepare_sets(dataset, feature_columns, "First")
 
-```{python}
-for y in y_list:
-    train_X, val_X, train_y, val_y = prepare_sets(dataset, feature_columns, y)
-    val_sets[(y, "val_X")] = val_X
-    val_sets[(y, "val_y")] = val_y
-    for model in model_list:
-        if model != "RandomForest":
-            results[(y,model,"mae", 0)], results[(y,model,"predictions", 0)], results[(y,model,"model", 0)] = train_model(train_X, val_X, train_y, val_y, model, n_estimators=None)
-        else:
-            for n in estimators_list:
-                results[(y,model,"mae", n)], results[(y,model,"predictions", n)], results[(y,model,"model", n)] = train_model(train_X, val_X, train_y, val_y, model, n)
+# DecisionTree
+mae_f_dt, predictions_f_dt, model_f_dt = train_model(train_f_X, val_f_X, train_f_y, val_f_y, "DecisionTree", n_estimators=None)
+# RandomForest
+mae_f_rf, predictions_f_rf, model_f_rf = train_model(train_f_X, val_f_X, train_f_y, val_f_y, "RandomForest", n_estimators=500)
+
+# Second
+train_s_X, val_s_X, train_s_y, val_s_y = prepare_sets(dataset, feature_columns, "Second")
+
+# DecisionTree
+mae_s_dt, predictions_s_dt, model_s_dt = train_model(train_s_X, val_s_X, train_s_y, val_s_y, "DecisionTree", n_estimators=None)
+# RandomForest
+mae_s_rf, predictions_s_rf, model_s_rf = train_model(train_s_X, val_s_X, train_s_y, val_s_y, "RandomForest", n_estimators=500)
 ```
 
 Compare the score with the mean value of the column that we predicted.
+```{python compare_models_all, echo=FALSE}
+1 - mae_f_dt/dataset["First"].mean()
+1 - mae_f_rf/dataset["First"].mean()
 
-```{python}
-for res in results.keys():
-    column, model, measure, treecount = res
-    if measure == "mae":
-        print(res, "Result: ", 1 - results[res]/dataset[column].mean())
+1 - mae_s_dt/dataset["Second"].mean()
+1 - mae_s_rf/dataset["Second"].mean()
 ```
 
 Look at the tree
-
-```{python, eval = FALSE}
+```{python, echo=FALSE, fig.align = "center"}
+plt.figure(figsize=(60, 40))
 # feature_columns is defined above
-for y in y_list:
-    for model in model_list:
-        if model == "RandomForest":
-            # one of the tree
-            print('\n Dose:{}, Model:{} \n'.format(y, model))
-            r = export_text(results[("First", "RandomForest", "model", 500)].estimators_[0], feature_names=feature_columns)
-            print(r)
-        else:
-            print('\n Dose:{}, Model:{} \n'.format(y, model))
-            r = export_text(results[(y, model, "model", 0)], feature_names=feature_columns)
-            print(r)
+tree.plot_tree(model_f_dt, max_depth=2, feature_names=feature_columns)
 ```
 
-```{python}
-plt.figure(figsize=(20,20))
+```{python, echo=FALSE, fig.align = "center"}
+plt.figure(figsize=(60,40))
 # feature_columns is defined above
-tree.plot_tree(results[("First", "DecisionTree", "model", 0)], max_depth=2, feature_names=feature_columns)
+tree.plot_tree(model_f_rf.estimators_[0], max_depth=2, feature_names=feature_columns)
 ```
 
-```{python}
-plt.figure(figsize=(20,20))
-# feature_columns is defined above
-tree.plot_tree(results[("First", "RandomForest", "model", 500)].estimators_[0], max_depth=2, feature_names=feature_columns)
+## Step 3: Plot results
+
+```{python first_plot_all, echo=FALSE, fig.align = "center"}
+plt.figure(figsize=(25,15))
+sns.set_style("darkgrid")
+plt.title('{} ({})'.format("Comparing", "First"))
+# plot DecisionTree
+sns.lineplot(data=predictions_f_dt, label='{} MAE:{}'.format("DecisionTree", round(mae_f_dt,0)))
+# plot RandomForest
+sns.lineplot(data=predictions_f_rf, label='{} MAE:{}'.format("RandomForest", round(mae_f_rf,0)))
+# plot validation set
+val_f_y.index=range(0,len(val_f_y))
+sns.lineplot(data=val_f_y, label="Validation")
+# add legend
+plt.legend()
 ```
 
-## Step 4: Plot results
-
-```{python}
-for y in y_list:
-    # set size, style and title
-    plt.figure(figsize=(25,15))
-    sns.set_style("darkgrid")
-    plt.title('{} ({})'.format("Comparing", y))
-    # plot predictions
-    for model in model_list:
-        if model == "RandomForest":
-            sns.lineplot(data=results[(y, model, "predictions", 500)], label='{} MAE:{}'.format(model, round(results[(y, model, "mae", 500)]),0))
-        else:
-            sns.lineplot(data=results[(y, model, "predictions", 0)], label='{} MAE:{}'.format(model, round(results[(y, model, "mae", 0)]),0))
-    # plot validation set
-    val_sets[(y, "val_y")].index=range(0,len(val_sets[(y, "val_y")]))
-    sns.lineplot(data=val_sets[(y, "val_y")], label="Validation")
-    # add legend
-    plt.legend()
+```{python second_plot_all, echo=FALSE, fig.align = "center"}
+plt.figure(figsize=(25,15))
+sns.set_style("darkgrid")
+plt.title('{} ({})'.format("Comparing", "Second"))
+# plot DecisionTree
+sns.lineplot(data=predictions_s_dt, label='{} MAE:{}'.format("DecisionTree", round(mae_s_dt,0)))
+# plot RandomForest
+sns.lineplot(data=predictions_s_rf, label='{} MAE:{}'.format("RandomForest", round(mae_s_rf,0)))
+# plot validation set
+val_s_y.index=range(0,len(val_s_y))
+sns.lineplot(data=val_s_y, label="Validation")
+# add legend
+plt.legend()
 ```
+\newpage
+## Step 4: Improve models by changing the dataset
 
-## Step 5: Improve models by changing the dataset
-
-### Work with features
-
-```{python}
-dataset.info()
-```
+I am going to work with features.
 
 Define necessary variables
-
-```{python}
+```{python, include=FALSE}
 feature_columns = ["Weekday", "Year", "DayOfYear"]
-y_list = ["First", "Second"]
-model_list = ["DecisionTree", "RandomForest"]
-estimators_list = [100,200,300,400,500]
-results = {}
-val_sets = {}
 ```
-
 Prepare sets and Train models
-
-```{python}
-for y in y_list:
-    train_X, val_X, train_y, val_y = prepare_sets(dataset, feature_columns, y)
-    val_sets[(y, "val_X")] = val_X
-    val_sets[(y, "val_y")] = val_y
-    for model in model_list:
-        if model != "RandomForest":
-            results[(y,model,"mae", 0)], results[(y,model,"predictions", 0)], results[(y,model,"model", 0)] = train_model(train_X, val_X, train_y, val_y, model, n_estimators=None)
-        else:
-            for n in estimators_list:
-                results[(y,model,"mae", n)], results[(y,model,"predictions", n)], results[(y,model,"model", n)] = train_model(train_X, val_X, train_y, val_y, model, n)
+```{python train_my, ref.label=c('train_all'), echo=FALSE}
 ```
-
 Compare the score with the mean value of the column that we predicted.
-
-```{python}
-for res in results.keys():
-    column, model, measure, treecount = res
-    if measure == "mae":
-        print(res, "Result: ", 1 - results[res]/dataset[column].mean())
+```{python compare_models_my, ref.label=c('compare_models_all'), echo=FALSE}
+```
+Plot the result.
+```{python first_plot_my, ref.label=c('first_plot_all'), echo=FALSE, fig.align = "center"}
 ```
 
+```{python second_plot_my, ref.label=c('second_plot_all'), echo=FALSE, fig.align = "center"}
+```
 A combination of the following features give us the best result:
 * Weekday, 
 * Year, 
 * DayOfYear
 
-```{python}
-for y in y_list:
-    # set size, style and title
-    plt.figure(figsize=(25,15))
-    sns.set_style("darkgrid")
-    plt.title('{} ({})'.format("Comparing", y))
-    # plot predictions
-    for model in model_list:
-        if model == "RandomForest":
-            sns.lineplot(data=results[(y, model, "predictions", 500)], label='{} MAE:{}'.format(model, round(results[(y, model, "mae", 500)]),0))
-        else:
-            sns.lineplot(data=results[(y, model, "predictions", 0)], label='{} MAE:{}'.format(model, round(results[(y, model, "mae", 0)]),0))
-    # plot validation set
-    val_sets[(y, "val_y")].index=range(0,len(val_sets[(y, "val_y")]))
-    sns.lineplot(data=val_sets[(y, "val_y")], label="Validation")
-    # add legend
-    plt.legend()
-```
 
-### Work with missing values
 
-```{python}
-dataset.index.min()
-```
 
-```{python}
-dataset.index.max()
-```
 
-```{python}
-dates = pd.date_range(dataset.index.min(),dataset.index.max(),freq='d')
-```
-
-```{python}
-dates
-```
-
-```{python}
-len(dataset.index)
-```
-
-```{python}
-len(dates)
-```
-
-There are no missing dates.
 
