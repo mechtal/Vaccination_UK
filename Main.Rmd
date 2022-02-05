@@ -16,3 +16,6 @@ classoption: landscape
 ```{r child = 'DatasetRegion.Rmd'}
 ```
 \newpage
+```{r child = 'ML.Rmd'}
+```
+\newpage
