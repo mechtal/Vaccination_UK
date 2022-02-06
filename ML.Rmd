@@ -154,18 +154,6 @@ len(dates)
 There are no missing dates.
 
 ## Step 2: Split sets, train a Machine Learning Model and Evaluate performance
-
-Define necessary variables
-```{python, include=FALSE}
-feature_columns = ["Year", "Month", "Day", "DayOfYear", "Weekday", "Quarter", "IsMonthStart", "IsMonthEnd"]
-y_list = ["First", "Second"]
-model_list = ["DecisionTree", "RandomForest"]
-estimators_list = [100,200,300,400,500]
-results = {}
-val_sets = {}
-```
-
-Prepare sets and train models using parameters.
 ```{r python_functions, include=FALSE}
 # function for preparing sets
 source_python('prepare_sets.py')
@@ -173,102 +161,98 @@ source_python('prepare_sets.py')
 source_python('train_model.py')
 ```
 
-```{python train_all, include=FALSE}
-# First
-train_f_X, val_f_X, train_f_y, val_f_y = prepare_sets(dataset, feature_columns, "First")
-
-# DecisionTree
-mae_f_dt, predictions_f_dt, model_f_dt = train_model(train_f_X, val_f_X, train_f_y, val_f_y, "DecisionTree", n_estimators=None)
-# RandomForest
-mae_f_rf, predictions_f_rf, model_f_rf = train_model(train_f_X, val_f_X, train_f_y, val_f_y, "RandomForest", n_estimators=500)
-
-# Second
-train_s_X, val_s_X, train_s_y, val_s_y = prepare_sets(dataset, feature_columns, "Second")
-
-# DecisionTree
-mae_s_dt, predictions_s_dt, model_s_dt = train_model(train_s_X, val_s_X, train_s_y, val_s_y, "DecisionTree", n_estimators=None)
-# RandomForest
-mae_s_rf, predictions_s_rf, model_s_rf = train_model(train_s_X, val_s_X, train_s_y, val_s_y, "RandomForest", n_estimators=500)
+Define necessary variables
+```{python all_columns, include=FALSE}
+feature_columns = ["Year", "Month", "Day", "DayOfYear", "Weekday", "Quarter", "IsMonthStart", "IsMonthEnd"]
 ```
 
-Compare the score with the mean value of the column that we predicted.
-```{python compare_models_all, echo=FALSE}
-1 - mae_f_dt/dataset["First"].mean()
-1 - mae_f_rf/dataset["First"].mean()
+Prepare sets and train models using parameters.
+```{python first}
+y_column = "First"
+```
 
-1 - mae_s_dt/dataset["Second"].mean()
-1 - mae_s_rf/dataset["Second"].mean()
+```{python train_all, echo=FALSE}
+train_X, val_X, train_y, val_y = prepare_sets(dataset, feature_columns, y_column)
+
+# DecisionTree
+mae_dt, predictions_dt, model_dt = train_model(train_X, val_X, train_y, val_y, "DecisionTree", n_estimators=None)
+# RandomForest
+mae_rf, predictions_rf, model_rf = train_model(train_X, val_X, train_y, val_y, "RandomForest", n_estimators=500)
+
+print("DecisionTree: ", 1 - mae_dt/dataset[y_column].mean())
+print("RandomForest: ", 1 - mae_rf/dataset[y_column].mean())
 ```
 
 Look at the tree
-```{python, echo=FALSE, fig.align = "center"}
+```{python tree_dt, echo=FALSE, fig.align = "center"}
 plt.figure(figsize=(60, 40))
 # feature_columns is defined above
-tree.plot_tree(model_f_dt, max_depth=2, feature_names=feature_columns)
+tree.plot_tree(model_dt, max_depth=2, feature_names=feature_columns)
 ```
 
-```{python, echo=FALSE, fig.align = "center"}
+```{python tree_rf, echo=FALSE, fig.align = "center"}
 plt.figure(figsize=(60,40))
 # feature_columns is defined above
-tree.plot_tree(model_f_rf.estimators_[0], max_depth=2, feature_names=feature_columns)
+tree.plot_tree(model_rf.estimators_[0], max_depth=2, feature_names=feature_columns)
 ```
 
-## Step 3: Plot results
-
-```{python first_plot_all, echo=FALSE, fig.align = "center"}
+```{python plot_all, echo=FALSE, fig.align = "center"}
 plt.figure(figsize=(25,15))
 sns.set_style("darkgrid")
-plt.title('{} ({})'.format("Comparing", "First"))
+plt.title('{} ({})'.format("Comparing", y_column))
 # plot DecisionTree
-sns.lineplot(data=predictions_f_dt, label='{} MAE:{}'.format("DecisionTree", round(mae_f_dt,0)))
+sns.lineplot(data=predictions_dt, label='{} MAE:{}'.format("DecisionTree", round(mae_dt,0)))
 # plot RandomForest
-sns.lineplot(data=predictions_f_rf, label='{} MAE:{}'.format("RandomForest", round(mae_f_rf,0)))
+sns.lineplot(data=predictions_rf, label='{} MAE:{}'.format("RandomForest", round(mae_rf,0)))
 # plot validation set
-val_f_y.index=range(0,len(val_f_y))
-sns.lineplot(data=val_f_y, label="Validation")
+val_y.index=range(0,len(val_y))
+sns.lineplot(data=val_y, label="Validation")
 # add legend
 plt.legend()
 ```
 
-```{python second_plot_all, echo=FALSE, fig.align = "center"}
-plt.figure(figsize=(25,15))
-sns.set_style("darkgrid")
-plt.title('{} ({})'.format("Comparing", "Second"))
-# plot DecisionTree
-sns.lineplot(data=predictions_s_dt, label='{} MAE:{}'.format("DecisionTree", round(mae_s_dt,0)))
-# plot RandomForest
-sns.lineplot(data=predictions_s_rf, label='{} MAE:{}'.format("RandomForest", round(mae_s_rf,0)))
-# plot validation set
-val_s_y.index=range(0,len(val_s_y))
-sns.lineplot(data=val_s_y, label="Validation")
-# add legend
-plt.legend()
-```
-\newpage
-## Step 4: Improve models by changing the dataset
-
-I am going to work with features.
-
-Define necessary variables
-```{python, include=FALSE}
+```{python my_columns, include=FALSE}
 feature_columns = ["Weekday", "Year", "DayOfYear"]
 ```
-Prepare sets and Train models
-```{python train_my, ref.label=c('train_all'), echo=FALSE}
-```
-Compare the score with the mean value of the column that we predicted.
-```{python compare_models_my, ref.label=c('compare_models_all'), echo=FALSE}
-```
-Plot the result.
-```{python first_plot_my, ref.label=c('first_plot_all'), echo=FALSE, fig.align = "center"}
+
+```{python, echo=FALSE}
+<<train_all>>
+#<<tree_dt>>
+#<<tree_rf>>
+<<plot_all>>
 ```
 
-```{python second_plot_my, ref.label=c('second_plot_all'), echo=FALSE, fig.align = "center"}
+
+Repeat for the Second
+```{python second_train}
+y_column = "Second"
 ```
+
+```{python, echo=FALSE}
+<<columns_all>>
+<<train_all>>
+#<<tree_dt>>
+#<<tree_rf>>
+<<plot_all>>
+```
+
+```{python, echo=FALSE}
+<<columns_my>>
+<<train_all>>
+#<<tree_dt>>
+#<<tree_rf>>
+<<plot_all>>
+```
+
+Compare the score with the mean value of the column that we predicted.
+
 A combination of the following features give us the best result:
-* Weekday, 
-* Year, 
-* DayOfYear
+
+- Weekday, 
+
+- Year, 
+
+- DayOfYear
 
 
 
