@@ -5,6 +5,7 @@ classoption: landscape
 ---
 # Step 4 Machine learning
 
+\newpage
 ## Step 0: Look at and Modify the dataset
 So, I am curious. Can I predict vaccination data?
 
@@ -61,6 +62,13 @@ library(ggplot2)
 #---------------------------------------
 if(!require(psych)){install.packages("psych")}
 library(psych)
+#---------------------------------------
+# knitr, kableExtra -- describing data
+#---------------------------------------
+if(!require(knitr)){install.packages("knitr")}
+library(knitr)
+if(!require(kableExtra)){install.packages("kableExtra")}
+library(kableExtra)
 ```
 
 ```{python read_data, include=FALSE}
@@ -83,12 +91,12 @@ dataset = dataset.fillna(0)
 ```
 
 I will work with the South West's vaccination data.
-```{r DataRegions, echo=FALSE} 
-knitr::kable(py$dataset[1:5,])
-```
+```{r DataRegions, eval=TRUE, echo=FALSE}
+kable(py$dataset[1:10,])
+``` 
 
 ```{python DataRegions_all_years, fig.align = "center", echo=FALSE}
-plt.figure(figsize=(20,20))
+plt.figure(figsize=(20,12))
 sns.heatmap(data=
             dataset.sort_index())
 ```
@@ -111,70 +119,83 @@ dataset['IsMonthStart'] = dataset.index.is_month_start
 dataset['IsMonthEnd'] = dataset.index.is_month_end
 ```
 
-```{r DataRegions_features, echo=FALSE} 
-knitr::kable(py$dataset[1:5,])
+```{r DataRegions_features, eval=TRUE, echo=FALSE} 
+kable(py$dataset[1:10,])
 ```
+
+First of all, I am going to use Regression Machine Learning models: 
+
+- [Decision Tree](https://scikit-learn.org/stable/modules/tree.html#regression) 
+
+- [Random Forest](https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestRegressor.html).
+
+Let's look at the dataset carefully.
 \newpage
+
 ## Step 1: Explore the dataset
 
 ### Data types
-```{r, echo=FALSE}
-knitr::kable(sapply(py$dataset, typeof))
+```{r, echo=FALSE, eval=TRUE, echo=FALSE}
+kable(sapply(py$dataset, typeof))
 ```
 
+The good news is I don't need to convert my variables because they fit into Regression Machine Learning models.
+
+\newpage
 ### Data description
-```{r, echo=FALSE}
-knitr::kable(describe(py$dataset))
+```{r, long_dataset, include=FALSE}
+dataset_long <- melt(py$dataset
+                       , measure.vars = c("First", "Second", "Third")
+                       , variable.name = "Dose"
+                       , value.name = "Count"
+                    )
 ```
 
+```{r, include=FALSE}
+dataset_desc <- describe(py$dataset)
+```
+
+_Median and mean_
+
+```{r, echo=FALSE, eval=TRUE, echo=FALSE}
+kable(dataset_desc[c("First", "Second", "Third"), c("mean", "median")])
+```
+
+Mean and median have a visible difference. What does it mean? There are large values that influence mean values.
+
+```{r, echo=FALSE, fig.align = "center"}
+dataset_long %>%
+ggplot(aes(x=Count, fill=Dose)) +
+    geom_histogram( color="#e9ecef", bins = 15, position = 'identity') +
+  facet_grid(Dose ~ .)
+```
+
+\newpage
 ### Zeroes
 
 ```{r, echo=FALSE}
-zeroes = py$dataset
-
-zeroes <- zeroes %>% mutate(z_third =
-           case_when(Third == 0 ~ "0", 
-                     Third > 0 ~ ">0"),
-           z_first =
-           case_when(First == 0 ~ "0", 
-                     First > 0 ~ ">0"),
-           z_second =
-           case_when(Second == 0 ~ "0", 
-                     Second > 0 ~ ">0")          
+dataset_long <- dataset_long %>% mutate(zero =
+           case_when(Count == 0 ~ "0", 
+                     Count > 0 ~ "> 0")        
            )          
 ```
 
-
-
-
-```{r, echo=FALSE}
-ggplot(zeroes %>%
-        group_by(z_third) %>%
-        summarise(z_third_count=length(z_third)
-)
-, aes(x="", y=z_third_count, fill=z_third)) +
-  geom_bar(stat="identity", width=1) +
-  coord_polar("y", start=0)
-
-ggplot(zeroes %>%
-        group_by(z_first) %>%
-        summarise(z_first_count=length(z_first)
-)
-, aes(x="", y=z_first_count, fill=z_first)) +
-  geom_bar(stat="identity", width=1) +
-  coord_polar("y", start=0)
-
-ggplot(zeroes %>%
-        group_by(z_second) %>%
-        summarise(z_second_count=length(z_second)
-)
-, aes(x="", y=z_second_count, fill=z_second)) +
-  geom_bar(stat="identity", width=1) +
-  coord_polar("y", start=0)
+```{r, echo=FALSE, fig.align = "center", fig.height = 3, fig.width = 12}
+ggplot(dataset_long %>%
+        group_by(Dose, zero) %>%
+        summarise(zero_count=length(Count))
+, aes(x="", y=zero_count, fill=zero)) +
+  geom_bar(stat="identity", width=10) +
+  coord_polar("y", start=0) +
+  facet_grid(cols = vars(Dose)) +
+  theme_void() # remove background, grid, numeric labels
 ```
 
+The column "Third" has more zero values than "First" and "Second; but, I think, it won't influence models' accuracy.
+
+\newpage
 ### Correlations
-```{r, echo=FALSE}
+```{r, echo=FALSE, fig.align = "center"}
 melted_cormat <- melt(cor(py$dataset))
 ggplot(data = filter(melted_cormat, Var1 %in% c("First", "Second")), aes(x=Var1, y=Var2, fill=value)) + 
   geom_tile() +
@@ -185,17 +206,30 @@ ggplot(data = filter(melted_cormat, Var1 %in% c("First", "Second")), aes(x=Var1,
   geom_hline(yintercept = "DayOfYear", color = "blue", linetype = "dotted") +
   geom_hline(yintercept = "Quarter", color = "blue", linetype = "dotted")
 ```
-```{r, echo=FALSE}
-knitr::kable(filter(melted_cormat, Var1 %in% c("First", "Second"), Var2 %in% c("Month", "DayOfYear", "Quarter")))
+
+
+```{r, echo=FALSE, fig.align = "center"}
+kable(filter(melted_cormat, Var1 %in% c("First", "Second"), Var2 %in% c("Month", "DayOfYear", "Quarter")))
 ```
 
+As we can see, the column "First" has strong relationships with 
+
+- "Quarter", 
+
+- "DayOfYear",
+
+- "Month". 
+
+At the same time, the column "Second" doesn't have strong relationships; but we can use the same columns.
+
+\newpage
 ### Weekdays
 As you remember, I have a question.
 ```{r ref0, ref.label='q2', render=pander::pander, echo=FALSE}
 ```
 
 Let's answer.
-```{r, echo=FALSE}
+```{r, echo=FALSE, fig.align = "center"}
 dataset_weekdays <- 
   py$dataset %>%
   group_by(Weekday)%>%
@@ -217,12 +251,13 @@ ggplot(data = dataset_weekdays_long,
            )
          ) +
   geom_col(position = "dodge") +
-  geom_vline(xintercept = "Saturday", color = "red") +
+  geom_vline(xintercept = "Saturday", color = "red", linetype = "dotted") +
   facet_grid(Dose ~ .)
 ```
 
 So, most of South West's people prefer to get a jab on Saturdays.
 
+\newpage
 ### Missing values
 Calculate a count of dates in the dataset.
 ```{python, echo=FALSE}
@@ -235,6 +270,7 @@ len(dates)
 ```
 There are no missing dates.
 
+\newpage
 ## Step 2: Split sets, train a Machine Learning Model and Evaluate performance
 ```{r python_functions, include=FALSE}
 # function for preparing sets
@@ -309,7 +345,6 @@ Repeat for the Second
 ```{python second_train}
 y_column = "Second"
 ```
-
 ```{python, echo=FALSE}
 <<columns_all>>
 <<train_all>>
@@ -317,7 +352,7 @@ y_column = "Second"
 #<<tree_rf>>
 <<plot_all>>
 ```
-
+\newpage
 ```{python, echo=FALSE}
 <<columns_my>>
 <<train_all>>
@@ -330,7 +365,6 @@ Repeat for Third
 ```{python third_train}
 y_column = "Third"
 ```
-
 ```{python, echo=FALSE}
 <<columns_all>>
 <<train_all>>
@@ -338,7 +372,7 @@ y_column = "Third"
 #<<tree_rf>>
 <<plot_all>>
 ```
-
+\newpage
 ```{python, echo=FALSE}
 <<columns_my>>
 <<train_all>>
@@ -349,13 +383,7 @@ y_column = "Third"
 
 Compare the score with the mean value of the column that we predicted.
 
-A combination of the following features give us the best result:
-
-- Weekday, 
-
-- Year, 
-
-- DayOfYear
+A combination of the following features give us the best result: Weekday, Year, DayOfYear.
 
 
 
