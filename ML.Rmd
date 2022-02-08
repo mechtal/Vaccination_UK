@@ -51,6 +51,16 @@ library(ggplot2)
 #---------------------------------------
 if(!require(reshape2)){install.packages("reshape2")}
 library(reshape2)
+#---------------------------------------
+# ggplot2 -- plot
+#---------------------------------------
+if(!require(ggplot2)){install.packages("ggplot2")}
+library(ggplot2)
+#---------------------------------------
+# psych -- describing data
+#---------------------------------------
+if(!require(psych)){install.packages("psych")}
+library(psych)
 ```
 
 ```{python read_data, include=FALSE}
@@ -106,6 +116,78 @@ knitr::kable(py$dataset[1:5,])
 ```
 \newpage
 ## Step 1: Explore the dataset
+
+### Data types
+```{r, echo=FALSE}
+knitr::kable(sapply(py$dataset, typeof))
+```
+
+### Data description
+```{r, echo=FALSE}
+knitr::kable(describe(py$dataset))
+```
+
+### Zeroes
+
+```{r, echo=FALSE}
+zeroes = py$dataset
+
+zeroes <- zeroes %>% mutate(z_third =
+           case_when(Third == 0 ~ "0", 
+                     Third > 0 ~ ">0"),
+           z_first =
+           case_when(First == 0 ~ "0", 
+                     First > 0 ~ ">0"),
+           z_second =
+           case_when(Second == 0 ~ "0", 
+                     Second > 0 ~ ">0")          
+           )          
+```
+
+
+
+
+```{r, echo=FALSE}
+ggplot(zeroes %>%
+        group_by(z_third) %>%
+        summarise(z_third_count=length(z_third)
+)
+, aes(x="", y=z_third_count, fill=z_third)) +
+  geom_bar(stat="identity", width=1) +
+  coord_polar("y", start=0)
+
+ggplot(zeroes %>%
+        group_by(z_first) %>%
+        summarise(z_first_count=length(z_first)
+)
+, aes(x="", y=z_first_count, fill=z_first)) +
+  geom_bar(stat="identity", width=1) +
+  coord_polar("y", start=0)
+
+ggplot(zeroes %>%
+        group_by(z_second) %>%
+        summarise(z_second_count=length(z_second)
+)
+, aes(x="", y=z_second_count, fill=z_second)) +
+  geom_bar(stat="identity", width=1) +
+  coord_polar("y", start=0)
+```
+
+### Correlations
+```{r, echo=FALSE}
+melted_cormat <- melt(cor(py$dataset))
+ggplot(data = filter(melted_cormat, Var1 %in% c("First", "Second")), aes(x=Var1, y=Var2, fill=value)) + 
+  geom_tile() +
+   scale_fill_gradient2(low = "blue", high = "red", mid = "white", 
+   midpoint = 0, limit = c(-1,1), space = "Lab", 
+   name="Pearson\nCorrelation") +
+  geom_hline(yintercept = "Month", color = "blue", linetype = "dotted") +
+  geom_hline(yintercept = "DayOfYear", color = "blue", linetype = "dotted") +
+  geom_hline(yintercept = "Quarter", color = "blue", linetype = "dotted")
+```
+```{r, echo=FALSE}
+knitr::kable(filter(melted_cormat, Var1 %in% c("First", "Second"), Var2 %in% c("Month", "DayOfYear", "Quarter")))
+```
 
 ### Weekdays
 As you remember, I have a question.
@@ -226,6 +308,27 @@ feature_columns = ["Weekday", "Year", "DayOfYear"]
 Repeat for the Second
 ```{python second_train}
 y_column = "Second"
+```
+
+```{python, echo=FALSE}
+<<columns_all>>
+<<train_all>>
+#<<tree_dt>>
+#<<tree_rf>>
+<<plot_all>>
+```
+
+```{python, echo=FALSE}
+<<columns_my>>
+<<train_all>>
+#<<tree_dt>>
+#<<tree_rf>>
+<<plot_all>>
+```
+
+Repeat for Third
+```{python third_train}
+y_column = "Third"
 ```
 
 ```{python, echo=FALSE}
