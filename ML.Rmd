@@ -95,7 +95,7 @@ plt.figure(figsize=(20,12))
 sns.heatmap(data=
             dataset.sort_index())
 ```
-As we can see, there are waves. So, the count of jabs depends on dates.
+As we discuss earlier \@ref(fig:DosesWaves), there are waves. So, the count of jabs depends on dates.
 
 Let's get features:
 1) Year
@@ -114,8 +114,7 @@ dataset['IsMonthStart'] = dataset.index.is_month_start
 dataset['IsMonthEnd'] = dataset.index.is_month_end
 ```
 
-```{r DataRegions_features, eval=TRUE, echo=FALSE} 
-kable(py$dataset[1:10,])
+```{r DataRegionsWithFeatures, ref.label=c('DataRegions'), echo=FALSE}
 ```
 
 First of all, I am going to use Regression Machine Learning models: 
@@ -283,13 +282,24 @@ feature_columns = ["Weekday", "Year", "DayOfYear"]
 <<plot_all>>
 ```
 
+```{python correlations_columns, include=FALSE}
+feature_columns = ["Month", "DayOfYear", "Quarter"]
+```
+
+```{python, echo=FALSE}
+<<train_all>>
+#<<tree_dt>>
+#<<tree_rf>>
+<<plot_all>>
+```
+
 
 Repeat for the Second
 ```{python second_train}
 y_column = "Second"
 ```
 ```{python, echo=FALSE}
-<<columns_all>>
+<<all_columns>>
 <<train_all>>
 #<<tree_dt>>
 #<<tree_rf>>
@@ -297,19 +307,30 @@ y_column = "Second"
 ```
 \newpage
 ```{python, echo=FALSE}
-<<columns_my>>
+<<my_columns>>
+<<train_all>>
+#<<tree_dt>>
+#<<tree_rf>>
+<<plot_all>>
+```
+\newpage
+```{python, echo=FALSE}
+<<correlations_columns>>
 <<train_all>>
 #<<tree_dt>>
 #<<tree_rf>>
 <<plot_all>>
 ```
 
+
+
+
 Repeat for Third
 ```{python third_train}
 y_column = "Third"
 ```
 ```{python, echo=FALSE}
-<<columns_all>>
+<<all_columns>>
 <<train_all>>
 #<<tree_dt>>
 #<<tree_rf>>
@@ -317,7 +338,15 @@ y_column = "Third"
 ```
 \newpage
 ```{python, echo=FALSE}
-<<columns_my>>
+<<my_columns>>
+<<train_all>>
+#<<tree_dt>>
+#<<tree_rf>>
+<<plot_all>>
+```
+\newpage
+```{python, echo=FALSE}
+<<correlations_columns>>
 <<train_all>>
 #<<tree_dt>>
 #<<tree_rf>>

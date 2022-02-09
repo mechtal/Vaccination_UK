@@ -234,7 +234,7 @@ group_by(MonthYear, Dose) %>%
 summarise(Count=sum(Count), na.rm = TRUE)
 ```
 
-```{r, echo=FALSE}
+```{r DosesWaves, fig.cap = "\\label{fig:DosesWaves} My caption", echo=FALSE}
 ggplot(data = region_set_long_agg, 
 aes(x=MonthYear, 
 y=Count, 
