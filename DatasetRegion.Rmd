@@ -265,3 +265,27 @@ ggplot(aes(x=Count, fill=Dose)) +
     geom_histogram( color="#e9ecef", bins = 15, position = 'identity') +
   facet_grid(Dose ~ .)
 ```
+
+
+\newpage
+### Zeroes
+
+```{r, echo=FALSE}
+region_set_long <- region_set_long %>% mutate(zero =
+           case_when(Count == 0 ~ "0", 
+                     Count > 0 ~ "> 0")        
+           )          
+```
+
+```{r, echo=FALSE, fig.align = "center", fig.height = 3, fig.width = 12}
+ggplot(region_set_long %>%
+        group_by(Dose, zero) %>%
+        summarise(zero_count=length(Count))
+, aes(x="", y=zero_count, fill=zero)) +
+  geom_bar(stat="identity", width=10) +
+  coord_polar("y", start=0) +
+  facet_grid(cols = vars(Dose)) +
+  theme_void() # remove background, grid, numeric labels
+```
+
+The column "Third" has more zero values than "First" and "Second; but, I think, it won't influence models' accuracy.
