@@ -58,11 +58,6 @@ library(reshape2)
 if(!require(ggplot2)){install.packages("ggplot2")}
 library(ggplot2)
 #---------------------------------------
-# psych -- describing data
-#---------------------------------------
-if(!require(psych)){install.packages("psych")}
-library(psych)
-#---------------------------------------
 # knitr, kableExtra -- describing data
 #---------------------------------------
 if(!require(knitr)){install.packages("knitr")}
@@ -140,58 +135,6 @@ kable(sapply(py$dataset, typeof))
 ```
 
 The good news is I don't need to convert my variables because they fit into Regression Machine Learning models.
-
-\newpage
-### Data description
-```{r, long_dataset, include=FALSE}
-dataset_long <- melt(py$dataset
-                       , measure.vars = c("First", "Second", "Third")
-                       , variable.name = "Dose"
-                       , value.name = "Count"
-                    )
-```
-
-```{r, include=FALSE}
-dataset_desc <- describe(py$dataset)
-```
-
-_Median and mean_
-
-```{r, echo=FALSE, eval=TRUE, echo=FALSE}
-kable(dataset_desc[c("First", "Second", "Third"), c("mean", "median")])
-```
-
-Mean and median have a visible difference. What does it mean? There are large values that influence mean values.
-
-```{r, echo=FALSE, fig.align = "center"}
-dataset_long %>%
-ggplot(aes(x=Count, fill=Dose)) +
-    geom_histogram( color="#e9ecef", bins = 15, position = 'identity') +
-  facet_grid(Dose ~ .)
-```
-
-\newpage
-### Zeroes
-
-```{r, echo=FALSE}
-dataset_long <- dataset_long %>% mutate(zero =
-           case_when(Count == 0 ~ "0", 
-                     Count > 0 ~ "> 0")        
-           )          
-```
-
-```{r, echo=FALSE, fig.align = "center", fig.height = 3, fig.width = 12}
-ggplot(dataset_long %>%
-        group_by(Dose, zero) %>%
-        summarise(zero_count=length(Count))
-, aes(x="", y=zero_count, fill=zero)) +
-  geom_bar(stat="identity", width=10) +
-  coord_polar("y", start=0) +
-  facet_grid(cols = vars(Dose)) +
-  theme_void() # remove background, grid, numeric labels
-```
-
-The column "Third" has more zero values than "First" and "Second; but, I think, it won't influence models' accuracy.
 
 \newpage
 ### Correlations
