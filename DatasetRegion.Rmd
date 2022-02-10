@@ -66,32 +66,34 @@ library(psych)
 ## Region
 
 As we can see on the website, Region metrics are available for regions of England. I am interested in the South West and metrics that start with "New":
+
 ```{r, echo=FALSE}
 region_set <- read.csv(paste(path,"region_2022-01-27.csv",sep=""),
                          header = TRUE,
                          sep = ","
                          )
 
-colnames(region_set)
+# change date's format
+region_set$date <- as.Date(region_set$date,format = '%Y-%m-%d')
+
+
+kable(colnames(region_set), col.names = NULL)
 ```
+
+
 We have additional columns. Let's look at them.
 
-areaCode
-```{r, echo=FALSE}
-unique(region_set[,"areaCode"])
-```
-areaName
-```{r, echo=FALSE}
-unique(region_set[,"areaName"])
-```
-areaType
-```{r, echo=FALSE}
-unique(region_set[,"areaType"])
-```
+- For **areaCode** unique value is $`r unique(region_set[,"areaCode"])`$,
+
+- for **areaName** unique value is $`r unique(region_set[,"areaName"])`$,
+
+- for **areaType** unique value is $`r unique(region_set[,"areaType"])`$.
 
 So, we do not need to look at them in the future because these columns are used for filtering that we have already done on the website.
 
 Let's prepare data for the plotting.
+
+- Rename columns and columns
 
 ```{r, include=FALSE}
 # rename columns
@@ -100,14 +102,20 @@ region_set = rename(region_set,
        ,Second = newPeopleVaccinatedSecondDoseByVaccinationDate
        ,Third = newPeopleVaccinatedThirdInjectionByVaccinationDate
          )
-# change date's format
-region_set$date <- as.Date(region_set$date,format = '%Y-%m-%d')
+```
 
+- Add the column MonthYear
+
+```{r, include=FALSE}
 # add columns
 MonthYear <- c(c(paste(1:12,2020,sep=".")), c(paste(1:12,2021,sep=".")), c(paste(1:12,2022,sep=".")))
 region_set$MonthYear <- factor(paste(month(region_set$date), year(region_set$date), sep=".")
                                , levels = MonthYear)
+```
 
+- Create long table
+
+```{r, include=FALSE}
 # add the long verstion
 region_set_long <- melt(region_set
                        , id.vars = c("date", "MonthYear")
@@ -120,30 +128,26 @@ region_set_long <- melt(region_set
                     )
 ```
 
-* Rename columns and columns
-
 ```{r, echo=FALSE}
-head(region_set) %>%
-  kable() %>%
-  kable_styling()
+kable(head(region_set_long))
 ```
-
-* Create long table
-
-```{r, echo=FALSE}
-head(region_set_long) %>%
-    kable() %>%
-  kable_styling()
-```
-
 Let's plot something.
 
+```{r}
+myFirst <- as.Date("2021-08-08", format="%Y-%m-%d")
+mySecond <- as.Date("2021-10-03", format="%Y-%m-%d")
+myThird <- as.Date("2022-01-08", format="%Y-%m-%d")
+
+region_set_long_period <- filter(region_set_long, date >= as.Date("2021-07-01", format = "%Y-%m-%d"))
+```
+
+\newpage
 ### Question 0
 ```{r ref0, ref.label='q0', render=pander::pander, echo=FALSE}
 ```
 
-```{r, echo=FALSE}
-ggplot(data = filter(region_set_long, date >= as.Date("2021-07-01", format = "%Y-%m-%d"))
+```{r AllDosesPlot, echo=FALSE, fig.cap = "\\label{fig:AllDosesPlot} My caption"}
+ggplot(data = region_set_long_period
        , aes(x=date
              , y=Count
              , colour = Dose
@@ -151,26 +155,25 @@ ggplot(data = filter(region_set_long, date >= as.Date("2021-07-01", format = "%Y
        ) + 
 geom_point() +
 theme(axis.text.x = element_text(angle=90, hjust = 1)) +
-geom_vline(xintercept = as.Date("2021-08-08", format = "%Y-%m-%d"), color = "red") +
-geom_vline(xintercept = as.Date("2021-10-03", format = "%Y-%m-%d"), color = "red") +
-geom_vline(xintercept = as.Date("2022-01-08", format = "%Y-%m-%d"), color = "red")
+geom_vline(xintercept = myFirst, color = "red") +
+geom_vline(xintercept = mySecond, color = "red") +
+geom_vline(xintercept = myThird, color = "red") 
 ```
 
 The result is not beautiful because of the active growth of the third jabs count at the end of 2021. 
 
 Let's plot them separately.
 
+\newpage
 ```{r,echo=FALSE}
-ggplot(data = filter(region_set_long, 
-                     date >= as.Date("2021-07-01", format = "%Y-%m-%d") &
-                       Dose == "First")
+ggplot(data = filter(region_set_long_period, Dose == "First")
        , aes(x=date
              , y=Count
              )
        ) + 
 geom_point(colour = "blue") +
 theme(axis.text.x = element_text(angle=90, hjust = 1)) +
-geom_vline(xintercept = as.Date("2021-08-08", format = "%Y-%m-%d"), color = "red") +
+geom_vline(xintercept = myFirst, color = "red") +
   labs(
     x = "Date"
     , y = "Count of first doses"
@@ -180,53 +183,53 @@ geom_vline(xintercept = as.Date("2021-08-08", format = "%Y-%m-%d"), color = "red
   )
 ```
 
-It is so interesting why the graph is wavy. 
+It is so interesting why the graph is wavy. $`r filter(region_set, date==myFirst)["First"]`$ people got their first jabs with me.
 
+\newpage
 ```{r, echo=FALSE}
-ggplot(data = filter(region_set_long, 
-                     date >= as.Date("2021-07-01", format = "%Y-%m-%d") &
-                       Dose == "Second")
+ggplot(data = filter(region_set_long_period, Dose == "Second")
        , aes(x=date
              , y=Count
              )
        ) + 
 geom_point(colour="blue") +
 theme(axis.text.x = element_text(angle=90, hjust = 1)) +
-geom_vline(xintercept = as.Date("2021-10-03", format = "%Y-%m-%d"), color = "red") +
+geom_vline(xintercept = mySecond, color = "red") +
   labs(
     x = "Date"
     , y = "Count of second doses"
-    , title = "Vaccination in England"
+    , title = "Vaccination in South West"
     , subtitle = "The second dose"
     , caption = "More information https://coronavirus.data.gov.uk/details/about-data"
   )
 ```
 
+$`r filter(region_set, date==mySecond)["Second"]`$ people got their second jabs with me.
 
-
+\newpage
 ```{r, echo=FALSE}
-ggplot(data = filter(region_set_long, 
-                     date >= as.Date("2021-07-01", format = "%Y-%m-%d") &
-                       Dose == "Third")
+ggplot(data = filter(region_set_long_period, Dose == "Third")
        , aes(x=date
              , y=Count
              )
        ) + 
 geom_point(colour="blue") +
 theme(axis.text.x = element_text(angle=90, hjust = 1)) +
-geom_vline(xintercept = as.Date("2022-01-08", format = "%Y-%m-%d"), color = "red") +
+geom_vline(xintercept = myThird, colour="red") +
+geom_vline(xintercept = as.Date("2021-09-17", format = "%Y-%m-%d"), color = "black", linetype="dotted") +
   labs(
     x = "Date"
     , y = "Count of third doses"
-    , title = "Vaccination in England"
+    , title = "Vaccination in South West"
     , subtitle = "The third dose"
     , caption = "More information https://coronavirus.data.gov.uk/details/about-data"
   )
 ```
 
+$`r filter(region_set, date==myThird)["Third"]`$ people got their third jabs with me.
 We can see when the active phase of vaccination by the third dose started.
 
-Let's calculate the date.
+Let's calculate the date. ("2021-09-17")
 
 ```{r, include=FALSE}
 region_set_long_agg <- region_set_long[,c("MonthYear", "Dose", "Count")] %>%
@@ -234,6 +237,7 @@ group_by(MonthYear, Dose) %>%
 summarise(Count=sum(Count), na.rm = TRUE)
 ```
 
+\newpage
 ```{r DosesWaves, fig.cap = "\\label{fig:DosesWaves} My caption", echo=FALSE}
 ggplot(data = region_set_long_agg, 
 aes(x=MonthYear, 
@@ -245,39 +249,17 @@ geom_col(position = "dodge") +
 theme(axis.text.x = element_text(angle=90, hjust = 1))
 ```
 
-### Data description
-
-```{r, include=FALSE}
-dataset_desc <- describe(region_set)
-```
-
-_Median and mean_
-
-```{r, echo=FALSE, eval=TRUE, echo=FALSE}
-kable(dataset_desc[c("First", "Second", "Third"), c("mean", "median")])
-```
-
-Mean and median have a visible difference. What does it mean? There are large values that influence mean values.
-
-```{r, echo=FALSE, fig.align = "center"}
-region_set_long %>%
-ggplot(aes(x=Count, fill=Dose)) +
-    geom_histogram( color="#e9ecef", bins = 15, position = 'identity') +
-  facet_grid(Dose ~ .)
-```
-
-
 \newpage
 ### Zeroes
 
-```{r, echo=FALSE}
+```{r ZeroSet, echo=FALSE}
 region_set_long <- region_set_long %>% mutate(zero =
            case_when(Count == 0 ~ "0", 
                      Count > 0 ~ "> 0")        
            )          
 ```
 
-```{r, echo=FALSE, fig.align = "center", fig.height = 3, fig.width = 12}
+```{r ZeroPlot, echo=FALSE, fig.align = "center", fig.height = 3, fig.width = 12}
 ggplot(region_set_long %>%
         group_by(Dose, zero) %>%
         summarise(zero_count=length(Count))
@@ -288,4 +270,55 @@ ggplot(region_set_long %>%
   theme_void() # remove background, grid, numeric labels
 ```
 
-The column "Third" has more zero values than "First" and "Second; but, I think, it won't influence models' accuracy.
+The column "Third" has more zero values than "First" and "Second; but, I think, it won't influence models' accuracy. 
+Also, we can see missing values for the column "Third"; in our case, missing values mean that nobody got the third jab. I suggest replacing them with zeroes.
+
+Replace missing values.
+
+```{r, include=FALSE}
+region_set_long[is.na(region_set_long)] <- 0
+```
+
+\newpage
+### Data description
+
+```{r, include=FALSE}
+dataset_desc <- describe(region_set[,c("First", "Second", "Third")], IQR=TRUE, quant=c(.25,.75,.90))
+```
+
+_Median, percentiles and mean_
+
+```{r, echo=FALSE, eval=TRUE, echo=FALSE}
+kable(dataset_desc[, c("mean", "median", "Q0.25", "Q0.75", "Q0.9")])
+```
+
+What can I say?
+
+- Mean and median have a visible difference. So, there are large extreme values.
+
+- For the Third dose, half of the values are below $`r dataset_desc["Third", "median"]`$. That is not surprised. In the beginning, people needed to get two jabs.
+
+- If we look at "Q0.25", "Q0.75", "Q0.90", we find out that the Third dose's wave caught up with other doses' waves quickly. We already saw this fact on the plot \@ref(fig:AllDosesPlot).
+```{r, include=FALSE}
+a_mean <- region_set_long %>% 
+  group_by(Dose) %>% 
+  summarize(mean_val = mean(Count),
+            median_val = median(Count))
+```
+
+```{r, echo=FALSE, fig.align = "center"}
+region_set_long %>%
+ggplot(aes(x=Count, fill=Dose)) +
+  geom_histogram(color="#e9ecef", bins = 15, position = 'identity') +
+  facet_wrap(~ Dose, ncol=1) +
+  geom_vline(data= a_mean, aes(xintercept=mean_val, color="mean"), linetype="dashed", size=1) +
+  geom_vline(data= a_mean, aes(xintercept=median_val, color="median"), linetype="dashed", size=1) +
+  scale_color_manual(name = "Statistics", values = c("mean" = "blue", "median" = "red")) 
+```
+_Standard deviation (sd), IQR and range_
+
+```{r, echo=FALSE, eval=TRUE, echo=FALSE}
+kable(dataset_desc[,c("sd", "range", "IQR")])
+```
+IQR and standard deviation for each dose are big, consequently, the data spread out.
+Also, we can see the difference between largest and smallest values in the column "range".
