@@ -1,12 +1,18 @@
 ---
+site: bookdown::bookdown_site
 output:
-  bookdown::pdf_document2: default
+  bookdown::pdf_document2:
+    fig_caption: yes
+    toc: yes
+    latex_engine: xelatex
+header-includes:
+   - \usepackage{floatrow}
+   - \floatsetup[figure]{capposition=top}
 classoption: landscape
 ---
 # Step 4 Machine learning
 
-\newpage
-## Step 0: Look at and Modify the dataset
+## Look at and Modify the dataset
 So, I am curious. Can I predict vaccination data?
 
 ```{r python, include=FALSE}
@@ -123,23 +129,59 @@ First of all, I am going to use Regression Machine Learning models:
 
 - [Random Forest](https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestRegressor.html).
 
+What is my plan?
+
+1. Read data
+
+I already did this step.
+
+2.  Understand statistics about the data 
+
+It will be helpful to choose the right features for better results. 
+
+- Work with missing data and categorical variables
+- Work with outliers or not completed data.
+
+5.  Store prediction target (y) in a Series,
+selecting multiple features by providing a list of column names inside brackets, 
+define X (subset with features),
+check the X summary.
+
+6. Choose the library
+
+7. Build and use the model
+What type of model will it be?
+Capture patterns from provided data.
+Predict
+Evaluate = Determine how accurate the model’s predictions are
+
 Let's look at the dataset carefully.
 \newpage
 
 ## Step 1: Explore the dataset
 
+In the previous chapter \@ref(region), we already looked at the South West's data. Do we need to know something else? Yes.
+
 ### Data types
+
+It is important to know which types of data columns have. Sometimes we don’t realise what we see: the string or the number.
 ```{r, echo=FALSE, eval=TRUE, echo=FALSE}
-kable(sapply(py$dataset, typeof))
+kable(sapply(py$dataset, typeof), col.names = NULL)
 ```
 
 The good news is I don't need to convert my variables because they fit into Regression Machine Learning models.
 
+We will move on to correlations.
+
 \newpage
 ### Correlations
+
+What do we need to remember? Correlation does not imply causation. So, the columns that have a strong relationship may show low accuracy in the model.
+
 ```{r, echo=FALSE, fig.align = "center"}
 melted_cormat <- melt(cor(py$dataset))
 ggplot(data = filter(melted_cormat, Var1 %in% c("First", "Second")), aes(x=Var1, y=Var2, fill=value)) + 
+  labs(x ="Dose", y = "Date features") +
   geom_tile() +
    scale_fill_gradient2(low = "blue", high = "red", mid = "white", 
    midpoint = 0, limit = c(-1,1), space = "Lab", 
@@ -149,18 +191,46 @@ ggplot(data = filter(melted_cormat, Var1 %in% c("First", "Second")), aes(x=Var1,
   geom_hline(yintercept = "Quarter", color = "blue", linetype = "dotted")
 ```
 
-
+In the table below, we can see the numeric values.
 ```{r, echo=FALSE, fig.align = "center"}
-kable(filter(melted_cormat, Var1 %in% c("First", "Second"), Var2 %in% c("Month", "DayOfYear", "Quarter")))
+kable(filter(melted_cormat, Var1 %in% c("First", "Second"), Var2 %in% c("Month", "DayOfYear", "Quarter")), col.names=NULL)
 ```
 
-As we can see, the column "First" has strong relationships with 
+As we can see, the column "First" has a strong relationship with 
 
 - "Quarter", 
 
 - "DayOfYear",
 
 - "Month". 
+
+
+```{r, echo=FALSE}
+ggplot(data = py$dataset, 
+        aes(x=First, 
+        y=Quarter)
+) +
+  geom_point() +
+geom_smooth(method="lm", formula='y~x')
+```
+
+```{r, echo=FALSE}
+ggplot(data = py$dataset, 
+        aes(x=First, 
+        y=DayOfYear)
+) +
+  geom_point() +
+geom_smooth(method="lm", formula='y~x')
+```
+
+```{r, echo=FALSE}
+ggplot(data = py$dataset, 
+        aes(x=First, 
+        y=Month)
+) +
+  geom_point() +
+geom_smooth(method="lm", formula='y~x')
+```
 
 At the same time, the column "Second" doesn't have strong relationships; but we can use the same columns.
 
@@ -169,6 +239,7 @@ At the same time, the column "Second" doesn't have strong relationships; but we 
 As you remember, I have a question.
 ```{r ref0, ref.label='q2', render=pander::pander, echo=FALSE}
 ```
+It may be helpful to choose the right features.
 
 Let's answer.
 ```{r, echo=FALSE, fig.align = "center"}
@@ -197,10 +268,13 @@ ggplot(data = dataset_weekdays_long,
   facet_grid(Dose ~ .)
 ```
 
-So, most of South West's people prefer to get a jab on Saturdays.
+So, most of South West’s people prefer to get a jab on Saturdays. That is not illogical because the side effects go away during the weekend.
 
 \newpage
 ### Missing values
+
+As we already saw in the previous chapter \@ref(region), the column "Third" has missing values, but we can replace them with zeroes. Do we have the dates when nobody got the jab?
+
 Calculate a count of dates in the dataset.
 ```{python, echo=FALSE}
 len(dataset.index)
@@ -212,6 +286,8 @@ len(dates)
 ```
 There are no missing dates.
 
+So, we have finished the dataset exploring. The next steps are about the models.
+
 \newpage
 ## Step 2: Split sets, train a Machine Learning Model and Evaluate performance
 ```{r python_functions, include=FALSE}
@@ -221,15 +297,23 @@ source_python('prepare_sets.py')
 source_python('train_model.py')
 ```
 
-Define necessary variables
+**Define necessary variables**
+
+First of all, I will use all columns that I have.
 ```{python all_columns, include=FALSE}
 feature_columns = ["Year", "Month", "Day", "DayOfYear", "Weekday", "Quarter", "IsMonthStart", "IsMonthEnd"]
 ```
 
-Prepare sets and train models using parameters.
+```{r, echo=FALSE}
+kable(py$feature_columns, col.names=NULL)
+```
+
+**Prepare sets and train models using parameters.**
 ```{python first}
 y_column = "First"
 ```
+
+The first column that I will predict is "First".
 
 ```{python train_all, echo=FALSE}
 train_X, val_X, train_y, val_y = prepare_sets(dataset, feature_columns, y_column)
@@ -244,6 +328,7 @@ print("RandomForest: ", 1 - mae_rf/dataset[y_column].mean())
 ```
 
 Look at the tree
+
 ```{python tree_dt, echo=FALSE, fig.align = "center"}
 plt.figure(figsize=(60, 40))
 # feature_columns is defined above
@@ -255,6 +340,12 @@ plt.figure(figsize=(60,40))
 # feature_columns is defined above
 tree.plot_tree(model_rf.estimators_[0], max_depth=2, feature_names=feature_columns)
 ```
+
+What can we see?
+
+
+
+Finally, look at the result.
 
 ```{python plot_all, echo=FALSE, fig.align = "center"}
 plt.figure(figsize=(25,15))
@@ -271,6 +362,21 @@ sns.lineplot(data=val_y, label="Validation")
 plt.legend()
 ```
 
+In my opinion, the result is good.
+
+- The waves were recognized.
+
+- The extreme values are bigger than in real data.
+
+Let’s work with the columns that I chose during the dataset exploring.
+
+- "Weekday" that we discussed in this chapter influences the wave during the week.
+
+- "Year" is the logical key because of the vaccination steps.
+
+- DayOfYear was chosen because of the dependency on dates.
+
+
 ```{python my_columns, include=FALSE}
 feature_columns = ["Weekday", "Year", "DayOfYear"]
 ```
@@ -281,6 +387,10 @@ feature_columns = ["Weekday", "Year", "DayOfYear"]
 #<<tree_rf>>
 <<plot_all>>
 ```
+
+The result is better a little, but extreme values are disappointed.
+
+Also, I suggest checking the model with columns that we discussed during the correlations search.
 
 ```{python correlations_columns, include=FALSE}
 feature_columns = ["Month", "DayOfYear", "Quarter"]
@@ -293,8 +403,9 @@ feature_columns = ["Month", "DayOfYear", "Quarter"]
 <<plot_all>>
 ```
 
+Not so good.
 
-Repeat for the Second
+**Repeat for the Second**
 ```{python second_train}
 y_column = "Second"
 ```
@@ -305,6 +416,7 @@ y_column = "Second"
 #<<tree_rf>>
 <<plot_all>>
 ```
+
 \newpage
 ```{python, echo=FALSE}
 <<my_columns>>
@@ -313,6 +425,7 @@ y_column = "Second"
 #<<tree_rf>>
 <<plot_all>>
 ```
+
 \newpage
 ```{python, echo=FALSE}
 <<correlations_columns>>
@@ -322,10 +435,7 @@ y_column = "Second"
 <<plot_all>>
 ```
 
-
-
-
-Repeat for Third
+**Repeat for Third**
 ```{python third_train}
 y_column = "Third"
 ```
@@ -336,6 +446,7 @@ y_column = "Third"
 #<<tree_rf>>
 <<plot_all>>
 ```
+
 \newpage
 ```{python, echo=FALSE}
 <<my_columns>>
@@ -344,6 +455,7 @@ y_column = "Third"
 #<<tree_rf>>
 <<plot_all>>
 ```
+
 \newpage
 ```{python, echo=FALSE}
 <<correlations_columns>>
@@ -352,8 +464,6 @@ y_column = "Third"
 #<<tree_rf>>
 <<plot_all>>
 ```
-
-Compare the score with the mean value of the column that we predicted.
 
 A combination of the following features give us the best result: Weekday, Year, DayOfYear.
 
