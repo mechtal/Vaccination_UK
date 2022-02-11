@@ -1,0 +1,13 @@
+---
+site: bookdown::bookdown_site
+output:
+  bookdown::pdf_document2:
+    fig_caption: yes
+    toc: yes
+    latex_engine: xelatex
+header-includes:
+   - \usepackage{floatrow}
+   - \floatsetup[figure]{capposition=top}
+classoption: landscape
+---
+## Bristol

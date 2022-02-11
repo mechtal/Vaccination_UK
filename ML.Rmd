@@ -12,7 +12,9 @@ classoption: landscape
 ---
 # Step 4 Machine learning
 
-## Look at and Modify the dataset
+## South West
+
+### Look at and Modify the dataset
 So, I am curious. Can I predict vaccination data?
 
 ```{r python, include=FALSE}
@@ -158,11 +160,11 @@ Evaluate = Determine how accurate the model’s predictions are
 Let's look at the dataset carefully.
 \newpage
 
-## Step 1: Explore the dataset
+### Explore the dataset
 
 In the previous chapter \@ref(region), we already looked at the South West's data. Do we need to know something else? Yes.
 
-### Data types
+#### Data types
 
 It is important to know which types of data columns have. Sometimes we don’t realise what we see: the string or the number.
 ```{r, echo=FALSE, eval=TRUE, echo=FALSE}
@@ -174,7 +176,7 @@ The good news is I don't need to convert my variables because they fit into Regr
 We will move on to correlations.
 
 \newpage
-### Correlations
+#### Correlations
 
 What do we need to remember? Correlation does not imply causation. So, the columns that have a strong relationship may show low accuracy in the model.
 
@@ -235,7 +237,7 @@ geom_smooth(method="lm", formula='y~x')
 At the same time, the column "Second" doesn't have strong relationships; but we can use the same columns.
 
 \newpage
-### Weekdays
+#### Weekdays
 As you remember, I have a question.
 ```{r ref0, ref.label='q2', render=pander::pander, echo=FALSE}
 ```
@@ -271,7 +273,7 @@ ggplot(data = dataset_weekdays_long,
 So, most of South West’s people prefer to get a jab on Saturdays. That is not illogical because the side effects go away during the weekend.
 
 \newpage
-### Missing values
+#### Missing values
 
 As we already saw in the previous chapter \@ref(region), the column "Third" has missing values, but we can replace them with zeroes. Do we have the dates when nobody got the jab?
 
@@ -289,7 +291,7 @@ There are no missing dates.
 So, we have finished the dataset exploring. The next steps are about the models.
 
 \newpage
-## Step 2: Split sets, train a Machine Learning Model and Evaluate performance
+### Split sets, train a Machine Learning Model and Evaluate performance
 ```{r python_functions, include=FALSE}
 # function for preparing sets
 source_python('prepare_sets.py')
