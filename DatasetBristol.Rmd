@@ -11,3 +11,155 @@ classoption: landscape
 ---
 ## Bristol {#bristol}
 
+```{r DatasetBristolRLibraries, include=FALSE}
+#---------------------------------------
+# ggplot2 -- plot
+#---------------------------------------
+if(!require(ggplot2)){install.packages("ggplot2")}
+library(ggplot2)
+#---------------------------------------
+# dplyr -- rename
+#---------------------------------------
+if(!require(dplyr)){install.packages("dplyr")}
+library(dplyr)
+#---------------------------------------
+# knitr -- create pretty tables for a presentation
+#---------------------------------------
+if(!require(knitr)){install.packages("knitr")}
+library(knitr)
+#---------------------------------------
+# psych -- describing data
+#---------------------------------------
+if(!require(psych)){install.packages("psych")}
+library(psych)
+#---------------------------------------
+# reshape2 -- use melt
+#---------------------------------------
+if(!require(reshape2)){install.packages("reshape2")}
+library(reshape2)
+```
+
+```{r DatasetBristolRFunctions, include=FALSE}
+conclusion <- function(dose, myAge, dataset) {
+  return(paste(
+          filter(dataset, date==get(paste("my", dose, sep='')) & age==myAge)[dose],
+          "people in my age group got their", 
+          dose, 
+          "jabs with me in Bristol."
+          )
+         )
+}
+```
+
+```{r, include=FALSE}
+path = "/Users/travel_mechtal/Documents/UWE/Portfolio/"
+```
+
+```{r, include=FALSE}
+dataset <- read.csv(paste(path,"ltla_2022-02-10.csv",sep=""),
+                         header = TRUE,
+                         sep = ","
+                         )
+
+# change date's format
+dataset$date <- as.Date(dataset$date,format = '%Y-%m-%d')
+```
+
+```{r, echo=FALSE}
+kable(colnames(dataset), col.names = NULL)
+```
+
+We have additional columns. Let's look at them.
+
+There are $`r n_distinct(dataset["areaCode"])`$ unique value for **areaCode**, $`r n_distinct(dataset["areaName"])`$ unique value for **areaName**, and $`r n_distinct(dataset["areaType"])`$ unique value for **areaType** as well.
+So, we do not need to look at them in the future because these columns are used for filtering that we have already done on the website.
+
+Just rename columns and we will move on to answer the questions.
+```{r, echo=FALSE}
+dataset = rename(dataset, 
+       First = newPeopleVaccinatedFirstDoseByVaccinationDate
+       ,Second = newPeopleVaccinatedSecondDoseByVaccinationDate
+       ,Third = newPeopleVaccinatedThirdInjectionByVaccinationDate
+         )
+
+dataset <- dataset[c("age", "date", "First", "Second", "Third")]
+
+kable(head(dataset))
+```
+
+```{r, include=FALSE}
+myFirst <- as.Date("2021-08-08", format="%Y-%m-%d")
+mySecond <- as.Date("2021-10-03", format="%Y-%m-%d")
+myThird <- as.Date("2022-01-08", format="%Y-%m-%d")
+myAge <- "25_29"
+```
+
+```{r, include=FALSE}
+dose = "First"
+```
+
+```{r BristolAgePlot,  fig.height = 10, fig.width = 12, fig.align = "center", echo=FALSE}
+ggplot(data = dataset, 
+       aes_string(x="date", 
+           y=dose,
+           colour="age")
+       ) +
+  geom_line() +
+  facet_grid(age ~ .) +
+  geom_vline(xintercept = get(paste("my", dose, sep='')), color = "red")
+```
+```{r conclusion, render=pander::pander, echo=FALSE}
+conclusion(dose, myAge, dataset)
+```
+
+```{r, echo=FALSE, fig.height = 10, fig.width = 12, fig.align = "center"}
+dose = "Second"
+<<BristolAgePlot>>
+```
+```{r, echo=FALSE, render=pander::pander}
+conclusion(dose, myAge, dataset)
+```
+
+```{r, echo=FALSE, fig.height = 10, fig.width = 12, fig.align = "center"}
+dose = "Third"
+<<BristolAgePlot>>
+```
+
+```{r, echo=FALSE, render=pander::pander}
+conclusion(dose, myAge, dataset)
+```
+
+Students
+```{r}
+dataset_student_long <- melt(filter(dataset, age=="18_24"), id.vars = c("date")
+                       , measure.vars = c("First", "Second", "Third")
+                       , variable.name = "Dose"
+                       , value.name = "Count"
+                    )
+```
+
+```{r}
+ggplot(data = dataset_student_long,
+       aes(x=date, y=Count, colour=Dose)) +
+    geom_rect(aes(xmin = as.Date("2020-10-19"),
+            xmax = as.Date("2021-01-22"),
+                ymin = -Inf, ymax = Inf, fill = '20/21 Teaching Block 1: Autumn Term'), alpha = .2)+
+    geom_rect(aes(xmin = as.Date("2021-02-08"),
+            xmax = as.Date("2021-05-07"),
+                ymin = -Inf, ymax = Inf, fill = '20/21 Teaching Block 2: Spring Term'), alpha = .2)+
+    geom_rect(aes(xmin = as.Date("2021-05-24"),
+            xmax = as.Date("2021-08-06"),
+                ymin = -Inf, ymax = Inf, fill = '20/21 Teaching Block 3: Summer Term'), alpha = .2)+
+    geom_rect(aes(xmin = as.Date("2021-09-27"),
+            xmax = as.Date("2022-01-28"),
+                ymin = -Inf, ymax = Inf, fill = '21/22 Teaching Block 1: Autumn Term'), alpha = .2)+
+  geom_line() +
+  facet_grid(Dose ~ .) +
+  theme(axis.text.x = element_text(angle=90, hjust = 1)) +
+  scale_x_date(date_breaks = "months" , date_labels = "%b-%y") +
+  #scale_fill_brewer(palette = 'Dark2', name = 'Year') +
+  scale_fill_hue(c=45, l=80)
+```
+https://www.uwe.ac.uk/study/term-dates/2020-21-term-dates
+https://www.uwe.ac.uk/study/term-dates/2021-22-term-dates
+https://www.uwe.ac.uk/study/term-dates/2022-23-term-dates
