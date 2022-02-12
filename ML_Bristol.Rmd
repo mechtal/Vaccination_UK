@@ -11,3 +11,75 @@ header-includes:
 classoption: landscape
 ---
 ## Bristol
+
+```{r BristolRLibraries, include=FALSE}
+#---------------------------------------
+# ggplot2 -- plot
+#---------------------------------------
+if(!require(ggplot2)){install.packages("ggplot2")}
+library(ggplot2)
+#---------------------------------------
+# dplyr -- rename
+#---------------------------------------
+if(!require(dplyr)){install.packages("dplyr")}
+library(dplyr)
+#---------------------------------------
+# knitr -- create pretty tables for a presentation
+#---------------------------------------
+if(!require(knitr)){install.packages("knitr")}
+library(knitr)
+```
+
+```{r, include=FALSE}
+path = "/Users/travel_mechtal/Documents/UWE/Portfolio/"
+```
+
+```{r, include=FALSE}
+dataset <- read.csv(paste(path,"ltla_2022-02-10.csv",sep=""),
+                         header = TRUE,
+                         sep = ","
+                         )
+
+# change date's format
+dataset$date <- as.Date(dataset$date,format = '%Y-%m-%d')
+
+dataset = rename(dataset, 
+       First = newPeopleVaccinatedFirstDoseByVaccinationDate
+       ,Second = newPeopleVaccinatedSecondDoseByVaccinationDate
+       ,Third = newPeopleVaccinatedThirdInjectionByVaccinationDate
+         )
+
+dataset <- dataset[c("age", "date", "First", "Second", "Third")]
+```
+
+```{r, echo=FALSE}
+age_ord <- unique(dataset["age"])
+dataset$Age <- which(age_ord == dataset$age)
+kable(head(dataset))
+```
+
+```{r, include=FALSE}
+y_column = "First"
+```
+
+```{r kmeans, echo=FALSE}
+cls <- kmeans(x = data.matrix(dataset[,c("Age", y_column)]), centers = 5)
+dataset$cluster <- as.character(cls$cluster)
+
+ggplot() +
+  geom_point(data = dataset, 
+             mapping = aes_string(x = "age", 
+                                  y = y_column, 
+                                  colour = "cluster")) +
+theme(axis.text.x = element_text(angle=90, hjust = 1))
+```
+
+```{r, echo=FALSE}
+y_column = "Second"
+<<kmeans>>
+```
+
+```{r, echo=FALSE}
+y_column = "Third"
+<<kmeans>>
+```
