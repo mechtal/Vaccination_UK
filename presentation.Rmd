@@ -1,0 +1,576 @@
+---
+title: "Coronavirus (COVID-19) vaccination in the UK"
+author: "Elena Basargina"
+date: "14/02/2022"
+output:
+  beamer_presentation:
+    theme: "Antibes"
+    colortheme: "seahorse"
+fontsize: 6pt
+---
+```{r PresenationLibraries, include=FALSE}
+#---------------------------------------
+# ggplot2 -- plot
+#---------------------------------------
+if(!require(ggplot2)){install.packages("ggplot2")}
+library(ggplot2)
+#---------------------------------------
+# dplyr -- rename
+#---------------------------------------
+if(!require(dplyr)){install.packages("dplyr")}
+library(dplyr)
+#---------------------------------------
+# knitr -- create pretty tables for a presentation
+#---------------------------------------
+if(!require(knitr)){install.packages("knitr")}
+library(knitr)
+#---------------------------------------
+# reshape2 -- use melt
+#---------------------------------------
+if(!require(reshape2)){install.packages("reshape2")}
+library(reshape2)
+#---------------------------------------
+# lubridate -- work with dates
+#---------------------------------------
+if(!require(lubridate)){install.packages("lubridate")}
+library(lubridate)
+#---------------------------------------
+# psych -- describing data
+#---------------------------------------
+if(!require(psych)){install.packages("psych")}
+library(psych)
+```
+
+```{r python, include=FALSE}
+# Setting for using python
+library(tidyverse)
+library(reticulate)
+use_python("/Users/travel_mechtal/opt/anaconda3/bin/python")
+use_condaenv("base", required = TRUE)
+
+# if I need a new module
+#py_install("ModuleName")
+# I already installed: pandas, networkx, typing_extensions, joblib, seaborn, scikit-learn
+```
+
+```{python python_libraries, include=FALSE}
+# work with dataframes
+import pandas as pd
+# work with dates
+import datetime as dt
+# split the dataset
+from sklearn.model_selection import train_test_split
+# evaluate the model
+from sklearn.metrics import mean_absolute_error
+# graph data
+pd.plotting.register_matplotlib_converters()
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn import tree
+from sklearn.tree import export_text
+# build a model
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.ensemble import RandomForestRegressor
+```
+
+# Introduction
+## What do I know about Bristol?
+
+- This city is a part of the UK, England, and South West. 
+
+- There are two universities.
+
+# Data
+
+I use the dataset from the 
+[website](https://coronavirus.data.gov.uk/details/vaccinations) about Coronavirus (COVID-19) in the UK.
+
+So, I am interested in data about the UK, England, South West, and Bristol. 
+
+```{r, include=FALSE}
+path = "/Users/travel_mechtal/Documents/UWE/Portfolio/"
+```
+
+**Bristol**
+```{r, echo=FALSE}
+bristol <- read.csv(paste(path,"ltla_2022-02-10.csv",sep=""),
+                         header = TRUE,
+                         sep = ","
+                         )
+
+# change date's format
+bristol$date <- as.Date(bristol$date,format = '%Y-%m-%d')
+
+bristol = rename(bristol, 
+       First = newPeopleVaccinatedFirstDoseByVaccinationDate
+       ,Second = newPeopleVaccinatedSecondDoseByVaccinationDate
+       ,Third = newPeopleVaccinatedThirdInjectionByVaccinationDate
+         )
+
+bristol <- bristol[c("age", "date", "First", "Second", "Third")]
+
+bristol[is.na(bristol)] <- 0
+
+kable(head(bristol[1,]))
+```
+```{r, include=FALSE}
+# add the long verstion
+bristol_long <- melt(bristol
+                       , id.vars = c("date",  "age")
+                       , measure.vars = c("First"
+                                          , "Second"
+                                          , "Third"
+                                       )
+                       , variable.name = "Dose"
+                       , value.name = "Count"
+                    )
+```
+
+**South West**
+```{r, echo=FALSE}
+southwest <- read.csv(paste(path,"region_2022-01-27.csv",sep=""),
+                         header = TRUE,
+                         sep = ","
+                         )
+
+# change date's format
+southwest$date <- as.Date(southwest$date,format = '%Y-%m-%d')
+
+southwest = rename(southwest, 
+       First = newPeopleVaccinatedFirstDoseByVaccinationDate
+       ,Second = newPeopleVaccinatedSecondDoseByVaccinationDate
+       ,Third = newPeopleVaccinatedThirdInjectionByVaccinationDate
+         )
+
+southwest <- southwest[c("date", "First", "Second", "Third")]
+
+southwest[is.na(southwest)] <- 0
+
+kable(head(southwest[1,]))
+```
+```{r, include=FALSE}
+# add the long verstion
+southwest_long <- melt(southwest
+                       , id.vars = c("date")
+                       , measure.vars = c("First"
+                                          , "Second"
+                                          , "Third"
+                                       )
+                       , variable.name = "Dose"
+                       , value.name = "Count"
+                    )
+```
+
+```{python read_data, include=FALSE}
+# read file
+path = "/Users/travel_mechtal/Documents/UWE/Portfolio/"
+data=pd.read_csv(path + "region_2022-01-27.csv", 
+index_col="date", parse_dates=True)
+
+# drop unnecessary columns: areaCode, areaName, areaType.
+dataset = data.drop(["areaCode", "areaName", "areaType"], axis=1)
+
+# rename columns
+# newPeopleVaccinatedFirstDoseByVaccinationDate -> First, 
+# newPeopleVaccinatedSecondDoseByVaccinationDate -> Second, 
+# newPeopleVaccinatedThirdInjectionByVaccinationDate -> Third
+dataset = dataset.rename(columns={"newPeopleVaccinatedFirstDoseByVaccinationDate":"First", 
+                                  "newPeopleVaccinatedSecondDoseByVaccinationDate":"Second", 
+                                  "newPeopleVaccinatedThirdInjectionByVaccinationDate":"Third"})
+# Replace Na values                                  
+dataset = dataset.fillna(0) 
+```
+
+
+# What do I know about the data?
+
+```{r, include=FALSE}
+bristol_desc <- describe(bristol[,c("First", "Second", "Third")], IQR=TRUE, quant=c(.25,.75,.90))
+```
+
+```{r, include=FALSE}
+southwest_desc <- describe(southwest[,c("First", "Second", "Third")], IQR=TRUE, quant=c(.25,.75,.90))
+```
+
+- There may be incorrect data
+
+- There are missing values
+
+- The counts of doses per day spread out. 
+
+- There are sets of small and large counts.
+
+# Questions 1
+
+```{r, include=FALSE}
+myFirst <- as.Date("2021-08-08", format="%Y-%m-%d")
+mySecond <- as.Date("2021-10-03", format="%Y-%m-%d")
+myThird <- as.Date("2022-01-08", format="%Y-%m-%d")
+myAge <- "25_29"
+```
+
+I was vaccinated by 
+
+- the first dose on $`r myFirst`$,
+
+- the second dose on $`r mySecond`$, 
+
+- the booster dose on $`r myThird`$.
+
+How many people got their jabs with me?
+
+---
+
+## Bristol
+
+```{r, echo=FALSE}
+kable(filter(bristol_long, ((date == myFirst & Dose == "First") | 
+                            (date == mySecond & Dose == "Second") |
+                            (date == myThird & Dose == "Third")
+                            ) 
+             & age == myAge))
+```
+
+```{r, include=FALSE}
+dose <- "First"
+```
+
+---
+
+```{r BristolAgePlot,  fig.height = 6.9, fig.width = 11.5, fig.align = "center", echo=FALSE}
+ggplot(data = bristol, 
+       aes_string(x="date", 
+           y=dose,
+           colour="age")
+       ) +
+  geom_line() +
+  facet_grid(age ~ .) +
+  geom_vline(xintercept = get(paste("my", dose, sep='')), color = "red") +
+  theme(strip.text.y = element_text(angle = 0)) +
+  scale_x_date(date_breaks = "months" , date_labels = "%b-%y") +
+  scale_y_continuous(n.breaks = 3)
+```
+
+---
+
+```{r, fig.height = 6.9, fig.width = 11.5, fig.align = "center", echo=FALSE}
+dose <- "Second"
+<<BristolAgePlot>>
+```
+
+---
+
+```{r, fig.height = 6.9, fig.width = 11.5, fig.align = "center", echo=FALSE}
+dose <- "Third"
+<<BristolAgePlot>>
+```
+
+---
+
+## South West
+
+```{r, echo=FALSE}
+kable(filter(southwest_long, ((date == myFirst & Dose == "First") | 
+                            (date == mySecond & Dose == "Second") |
+                            (date == myThird & Dose == "Third")
+                            ) 
+             ))
+```
+
+```{r, include=FALSE}
+# add columns
+MonthYear <- c(c(paste(1:12,2020,sep=".")), c(paste(1:12,2021,sep=".")), c(paste(1:12,2022,sep=".")))
+southwest$MonthYear <- factor(paste(month(southwest$date), year(southwest$date), sep=".")
+                               , levels = MonthYear)
+```
+
+```{r, include=FALSE}
+# add the long verstion
+region_set_long <- melt(southwest
+                       , id.vars = c("date", "MonthYear")
+                       , measure.vars = c("First"
+                                          , "Second"
+                                          , "Third"
+                                       )
+                       , variable.name = "Dose"
+                       , value.name = "Count"
+                    )
+
+region_set_long_period <- region_set_long #filter(region_set_long, date >= as.Date("2021-07-01", format = "%Y-%m-%d"))
+```
+
+
+```{r, include=FALSE}
+dose <- "First"
+```
+
+---
+
+```{r SouthWestPlot,fig.height = 6.9, fig.width = 11.5, fig.align = "center", echo=FALSE}
+ggplot(data = filter(region_set_long_period, Dose == dose)
+       , aes(x=date
+             , y=Count
+             )
+       ) + 
+geom_point(colour = "blue") +
+theme(axis.text.x = element_text(angle=90, hjust = 1)) +
+geom_vline(xintercept = get(paste("my", dose, sep='')), color = "red") +
+    scale_x_date(date_breaks = "months" , date_labels = "%b-%y") +
+  labs(
+    x = "Date"
+    , y = paste("Count of", dose, "doses")
+    , title = "Vaccination in South West"
+    , subtitle = paste("The", dose, "dose")
+    , caption = "More information https://coronavirus.data.gov.uk/details/about-data"
+  )
+```
+
+---
+
+```{r, fig.height = 6.9, fig.width = 11.5, fig.align = "center", echo=FALSE}
+dose <- "Second"
+<<SouthWestPlot>>
+```
+
+---
+
+```{r, fig.height = 6.9, fig.width = 11.5, fig.align = "center", echo=FALSE}
+dose <- "Third"
+<<SouthWestPlot>>
+```
+
+---
+
+# Conclusion
+
+I got my jabs in the not active phases of the vaccination, but I got the third one with a lot of people.
+
+Also, I can say that there are waves. So, the count of jabs depends on dates. Keep this fact in mind.
+
+# Question 2
+
+When do people prefer to get a jab: weekdays or weekends/Saturdays or Sundays? 
+
+---
+```{python DateFeatures, include=FALSE}
+dataset['Year'] = dataset.index.year
+dataset['Month'] = dataset.index.month
+dataset['Day'] = dataset.index.day
+dataset['DayOfYear'] = dataset.index.dayofyear
+dataset['Weekday'] = dataset.index.weekday
+dataset['Quarter'] = dataset.index.quarter
+dataset['IsMonthStart'] = dataset.index.is_month_start
+dataset['IsMonthEnd'] = dataset.index.is_month_end
+```
+
+
+```{r, echo=FALSE, fig.align = "center"}
+dataset_weekdays <- 
+  py$dataset %>%
+  group_by(Weekday)%>%
+  summarise(across(c("First", "Second", "Third"), ~ mean(.x, na.rm = TRUE)))
+
+dataset_weekdays$Weekday <- factor(dataset_weekdays$Weekday, labels = c('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'))
+
+dataset_weekdays_long <-
+  melt(dataset_weekdays, id.vars = c("Weekday")
+                       , measure.vars = c("First", "Second", "Third")
+                       , variable.name = "Dose"
+                       , value.name = "Count"
+                    )
+
+ggplot(data = dataset_weekdays_long, 
+       aes(x=Weekday, 
+           y=Count,
+           fill=Count
+           )
+         ) +
+  geom_col(position = "dodge") +
+  geom_vline(xintercept = "Saturday", color = "red", linetype = "dotted") +
+  facet_grid(Dose ~ .)
+```
+
+---
+
+Are there other dependencies?
+
+---
+
+First of all, I am going to use Regression Machine Learning models: 
+
+- [Decision Tree](https://scikit-learn.org/stable/modules/tree.html#regression) 
+
+- [Random Forest](https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestRegressor.html).
+
+Which columns should I choose?
+
+- "Weekday"
+
+- "Year"
+
+- "DayOfYear"
+
+---
+```{r python_functions, include=FALSE}
+# function for preparing sets
+source_python('prepare_sets.py')
+# function for training models
+source_python('train_model.py')
+```
+
+```{python my_columns, include=FALSE}
+feature_columns = ["Weekday", "Year", "DayOfYear"]
+```
+
+```{python first, include=FALSE}
+# The first column that I will predict is "First".
+y_column = "First"
+```
+
+```{python train_all, echo=FALSE, render=pander::pander}
+train_X, val_X, train_y, val_y = prepare_sets(dataset, feature_columns, y_column)
+
+# DecisionTree
+mae_dt, predictions_dt, model_dt = train_model(train_X, val_X, train_y, val_y, "DecisionTree", n_estimators=None)
+# RandomForest
+mae_rf, predictions_rf, model_rf = train_model(train_X, val_X, train_y, val_y, "RandomForest", n_estimators=500)
+
+print("DecisionTree: ", 1 - mae_dt/dataset[y_column].mean())
+print("RandomForest: ", 1 - mae_rf/dataset[y_column].mean())
+```
+
+```{python plot_all, echo=FALSE, fig.align = "center"}
+plt.figure(figsize=(12,6))
+sns.set_style("darkgrid")
+plt.title('{} ({})'.format("Comparing", y_column))
+# plot DecisionTree
+sns.lineplot(data=predictions_dt, label='{} MAE:{}'.format("DecisionTree", round(mae_dt,0)))
+# plot RandomForest
+sns.lineplot(data=predictions_rf, label='{} MAE:{}'.format("RandomForest", round(mae_rf,0)))
+# plot validation set
+val_y.index=range(0,len(val_y))
+sns.lineplot(data=val_y, label="Validation")
+# add legend
+plt.legend()
+```
+
+--- 
+
+```{python second_train, include=FALSE}
+y_column = "Second"
+```
+
+```{python, echo=FALSE}
+<<train_all>>
+<<plot_all>>
+```
+
+---
+
+```{python third_train, include=FALSE}
+y_column = "Third"
+```
+
+```{python, echo=FALSE}
+<<train_all>>
+<<plot_all>>
+```
+
+---
+
+- The waves are recognisable.
+
+- The extreme values are bigger than in real data.
+
+---
+
+# Question 3
+
+Are there dependencies between academic year events and vaccination waves?
+
+```{r, include=FALSE}
+age_ord <- unique(bristol["age"])
+bristol$Age <- which(age_ord == bristol$age)
+```
+
+```{r, include=FALSE}
+y_column = "First"
+```
+
+---
+
+```{r kmeans, echo=FALSE}
+cls <- kmeans(x = data.matrix(bristol[,c("Age", y_column)]), centers = 5)
+bristol$cluster <- as.character(cls$cluster)
+
+ggplot() +
+  geom_point(data = bristol, 
+             mapping = aes_string(x = "age", 
+                                  y = y_column, 
+                                  colour = "cluster")) +
+theme(axis.text.x = element_text(angle=90, hjust = 1))
+```
+
+---
+
+```{r, echo=FALSE}
+y_column = "Second"
+<<kmeans>>
+```
+
+---
+
+```{r, echo=FALSE}
+y_column = "Third"
+<<kmeans>>
+```
+
+```{r, include=FALSE}
+dataset_student_long <- melt(filter(bristol, age=="18_24"), id.vars = c("date")
+                       , measure.vars = c("First", "Second", "Third")
+                       , variable.name = "Dose"
+                       , value.name = "Count"
+                    )
+```
+
+---
+
+```{r, fig.height = 6.9, fig.width = 11.5, fig.align = "center", echo=FALSE}
+#https://www.uwe.ac.uk/study/term-dates/2020-21-term-dates
+#https://www.uwe.ac.uk/study/term-dates/2021-22-term-dates
+#https://www.uwe.ac.uk/study/term-dates/2022-23-term-dates
+ggplot(data = dataset_student_long,
+       aes(x=date, y=Count, colour=Dose)) +
+    geom_rect(aes(xmin = as.Date("2020-10-19"),
+            xmax = as.Date("2021-01-22"),
+                ymin = -Inf, ymax = Inf, fill = '20/21 Teaching Block 1: Autumn Term'), alpha = .2)+
+    geom_rect(aes(xmin = as.Date("2021-02-08"),
+            xmax = as.Date("2021-05-07"),
+                ymin = -Inf, ymax = Inf, fill = '20/21 Teaching Block 2: Spring Term'), alpha = .2)+
+    geom_rect(aes(xmin = as.Date("2021-05-24"),
+            xmax = as.Date("2021-08-06"),
+                ymin = -Inf, ymax = Inf, fill = '20/21 Teaching Block 3: Summer Term'), alpha = .2)+
+    geom_rect(aes(xmin = as.Date("2021-09-27"),
+            xmax = as.Date("2022-01-28"),
+                ymin = -Inf, ymax = Inf, fill = '21/22 Teaching Block 1: Autumn Term'), alpha = .2)+
+  geom_line() +
+  facet_grid(Dose ~ .) +
+  theme(axis.text.x = element_text(angle=90, hjust = 1)) +
+  scale_x_date(date_breaks = "months" , date_labels = "%b-%y") +
+  #scale_fill_brewer(palette = 'Dark2', name = 'Year') +
+  scale_fill_hue(c=45, l=80)
+```
+
+# What is next?
+
+- the UK data
+
+- England data 
+
+- deep learning and models considering time series.
+
+- domain knowledge facts
+
+# Thanks for your attention
+
+To be continued... :) 
