@@ -270,7 +270,8 @@ ggplot(data = dataset_weekdays_long,
   facet_grid(Dose ~ .)
 ```
 
-So, most of South West’s people prefer to get a jab on Saturdays. That is not illogical because the side effects go away during the weekend.
+So, most of South West’s people prefer to get a jab on Saturdays. 
+That is not illogical because, for example, for me, the side effects go away during the weekend.
 
 \newpage
 #### Missing values
