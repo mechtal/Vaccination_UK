@@ -11,6 +11,6 @@ Within the project, I use
 * R and R markdown,
 * Python.
 
-The result of the project is [Main.pdf](https://github.com/mechtal/Vaccination_UK/blob/eedac5f7a6fea780de893f324f219dd7135b79e4/Main.pdf).
+The result of the project is [Main.pdf](https://github.com/mechtal/Vaccination_UK/blob/main/Main.pdf).
 
 Contains public sector information licensed under the [Open Government Licence v3.0](https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/).
