@@ -113,7 +113,7 @@ conclusion(dose, myAge, dataset)
 ```
 
 ```{r, echo=FALSE, fig.height = 10, fig.width = 12, fig.align = "center"}
-dose = "Second"
+dose <- "Second"
 <<BristolAgePlot>>
 ```
 ```{r, echo=FALSE, render=pander::pander}
@@ -121,7 +121,7 @@ conclusion(dose, myAge, dataset)
 ```
 
 ```{r, echo=FALSE, fig.height = 10, fig.width = 12, fig.align = "center"}
-dose = "Third"
+dose <- "Third"
 <<BristolAgePlot>>
 ```
 
