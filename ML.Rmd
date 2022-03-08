@@ -74,6 +74,11 @@ if(!require(kableExtra)){install.packages("kableExtra")}
 library(kableExtra)
 ```
 
+```{r, include=FALSE}
+# for pretty tables
+source("my_kable.R")
+```
+
 ```{python read_data, include=FALSE}
 # read file
 path = "/Users/travel_mechtal/Documents/UWE/Portfolio/"
@@ -308,11 +313,11 @@ feature_columns = ["Year", "Month", "Day", "DayOfYear", "Weekday", "Quarter", "I
 ```
 
 ```{r, echo=FALSE}
-kable(py$feature_columns, col.names=NULL)
+my_kable(py$feature_columns)
 ```
 
 **Prepare sets and train models using parameters.**
-```{python first}
+```{python first, include=FALSE}
 y_column = "First"
 ```
 
@@ -409,7 +414,7 @@ feature_columns = ["Month", "DayOfYear", "Quarter"]
 Not so good.
 
 **Repeat for the Second**
-```{python second_train}
+```{python second_train, include=FALSE}
 y_column = "Second"
 ```
 ```{python, echo=FALSE}
@@ -439,7 +444,7 @@ y_column = "Second"
 ```
 
 **Repeat for Third**
-```{python third_train}
+```{python third_train, include=FALSE}
 y_column = "Third"
 ```
 ```{python, echo=FALSE}

@@ -28,6 +28,11 @@ library(dplyr)
 if(!require(knitr)){install.packages("knitr")}
 library(knitr)
 #---------------------------------------
+# kableExtra -- create pretty tables for a presentation
+#---------------------------------------
+if(!require(kableExtra)){install.packages("kableExtra")}
+library(kableExtra)
+#---------------------------------------
 # psych -- describing data
 #---------------------------------------
 if(!require(psych)){install.packages("psych")}
@@ -37,6 +42,11 @@ library(psych)
 #---------------------------------------
 if(!require(reshape2)){install.packages("reshape2")}
 library(reshape2)
+```
+
+```{r, include=FALSE}
+# for pretty tables
+source("my_kable.R")
 ```
 
 ```{r DatasetBristolRFunctions, include=FALSE}
@@ -65,8 +75,10 @@ dataset <- read.csv(paste(path,"ltla_2022-02-10.csv",sep=""),
 dataset$date <- as.Date(dataset$date,format = '%Y-%m-%d')
 ```
 
+The dataset's columns:
+
 ```{r, echo=FALSE}
-kable(colnames(dataset), col.names = NULL)
+my_kable(colnames(dataset))
 ```
 
 We have additional columns. Let's look at them.
@@ -129,8 +141,8 @@ dose <- "Third"
 conclusion(dose, myAge, dataset)
 ```
 
-Students
-```{r}
+**Students**
+```{r, include=FALSE}
 dataset_student_long <- melt(filter(dataset, age=="18_24"), id.vars = c("date")
                        , measure.vars = c("First", "Second", "Third")
                        , variable.name = "Dose"
@@ -138,9 +150,9 @@ dataset_student_long <- melt(filter(dataset, age=="18_24"), id.vars = c("date")
                     )
 ```
 
-```{r}
+```{r, echo=FALSE}
 ggplot(data = dataset_student_long,
-       aes(x=date, y=Count, colour=Dose)) +
+       aes(x=date, y=Count)) +
     geom_rect(aes(xmin = as.Date("2020-10-19"),
             xmax = as.Date("2021-01-22"),
                 ymin = -Inf, ymax = Inf, fill = '20/21 Teaching Block 1: Autumn Term'), alpha = .2)+
@@ -160,6 +172,9 @@ ggplot(data = dataset_student_long,
   #scale_fill_brewer(palette = 'Dark2', name = 'Year') +
   scale_fill_hue(c=45, l=80)
 ```
-https://www.uwe.ac.uk/study/term-dates/2020-21-term-dates
-https://www.uwe.ac.uk/study/term-dates/2021-22-term-dates
-https://www.uwe.ac.uk/study/term-dates/2022-23-term-dates
+
+<https://www.uwe.ac.uk/study/term-dates/2020-21-term-dates>
+
+<https://www.uwe.ac.uk/study/term-dates/2021-22-term-dates>
+
+<https://www.uwe.ac.uk/study/term-dates/2022-23-term-dates>

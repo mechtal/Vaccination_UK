@@ -1,6 +1,11 @@
 ---
 output:
-  bookdown::pdf_document2: default
+  bookdown::pdf_document2:
+    fig_caption: yes
+    latex_engine: xelatex
+header-includes:
+   - \usepackage{floatrow}
+   - \floatsetup[figure]{capposition=top}
 classoption: landscape
 ---
 # Step 1 Find dataset
@@ -36,6 +41,11 @@ library(hash)
 #---------------------------------------
 if(!require(tinytex)){install.packages("tinytex")}
 library(tinytex)
+```
+
+```{r, include=FALSE}
+# for pretty tables
+source("my_kable.R")
 ```
 
 ```{r Functions, include = FALSE}
@@ -86,14 +96,17 @@ for(AreaType in keys(AreaTypesDict)){
 ```
 
 * Look at the metrics
-
-**Lower Tier Local Authority (LTLA)**
-```{r, echo=FALSE}
-ltla
+```{r, include=FALSE}
+AreaTypeExample <- "ltla"
 ```
-**Nation**
+
+```{r AreaTypeExample, echo=FALSE}
+my_kable(get(AreaTypeExample), AreaTypesDict[[AreaTypeExample]])
+```
+
 ```{r, echo=FALSE}
-nation
+AreaTypeExample <- "nation"
+<<AreaTypeExample>>
 ```
 
 So, as we can see, **some metrics are common**.
@@ -139,11 +152,12 @@ third = UniqMetrics[grepl("third", UniqMetrics, fixed = TRUE)
                      ]
 ```
 
-_Look at the result_
+* Look at the result
+
 ```{r, echo=FALSE}
 M %>%
   kable(booktabs = TRUE) %>%
-  kable_styling() %>%
+  kable_styling(latex_options = "HOLD_position") %>%
   column_spec(1, width = "20em") %>%
   row_spec(which(UniqMetrics %in% first), color = "#104e8b", background = "#d3d3d3") %>%
   row_spec(which(UniqMetrics %in% second), color = "red", background = "#d3d3d3") %>%
@@ -153,18 +167,14 @@ M %>%
 First of all, I am interested in data about the **first jab**.
 **So, I need to look at the datasets:**
 
-* Build zero-matrix, which dimension is the count of metrics x the count of area types
-
 ```{r, echo=FALSE}
-FirstDataset = c()
+FirstDataset <- c()
 
 for(AreaType in keys(AreaTypesDict)){
   for(row in first) {
-    if(M[row,AreaType] == 1){FirstDataset=append(FirstDataset,AreaType)}
+    if(M[row,AreaType] == 1){FirstDataset=append(FirstDataset,AreaTypesDict[[AreaType]])}
   }
 }
 
-for(x in unique(FirstDataset)) {
-  print(AreaTypesDict[[x]])
-}
+my_kable(unique(FirstDataset))
 ```
