@@ -3,9 +3,10 @@ title: "Coronavirus (COVID-19) vaccination in the UK"
 author: "Elena Basargina"
 date: "14/02/2022"
 output:
-  beamer_presentation:
-    theme: "Antibes"
-    colortheme: "seahorse"
+  beamer_presentation
+  #beamer_presentation:
+    #theme: "Antibes"
+    #colortheme: "seahorse"
 fontsize: 6pt
 ---
 ```{r PresenationLibraries, include=FALSE}
@@ -240,8 +241,7 @@ dose <- "First"
 ```{r BristolAgePlot,  fig.height = 6.9, fig.width = 11.5, fig.align = "center", echo=FALSE}
 ggplot(data = bristol, 
        aes_string(x="date", 
-           y=dose,
-           colour="age")
+           y=dose)
        ) +
   geom_line() +
   facet_grid(age ~ .) +
@@ -312,7 +312,7 @@ ggplot(data = filter(region_set_long_period, Dose == dose)
              , y=Count
              )
        ) + 
-geom_point(colour = "blue") +
+geom_point(colour = "black") +
 theme(axis.text.x = element_text(angle=90, hjust = 1)) +
 geom_vline(xintercept = get(paste("my", dose, sep='')), color = "red") +
     scale_x_date(date_breaks = "months" , date_labels = "%b-%y") +
@@ -441,7 +441,7 @@ print("RandomForest: ", 1 - mae_rf/dataset[y_column].mean())
 
 ```{python plot_all, echo=FALSE, fig.align = "center"}
 plt.figure(figsize=(12,6))
-sns.set_style("darkgrid")
+#sns.set_style("whitegrid")
 plt.title('{} ({})'.format("Comparing", y_column))
 # plot DecisionTree
 sns.lineplot(data=predictions_dt, label='{} MAE:{}'.format("DecisionTree", round(mae_dt,0)))
@@ -508,7 +508,8 @@ ggplot() +
              mapping = aes_string(x = "age", 
                                   y = y_column, 
                                   colour = "cluster")) +
-theme(axis.text.x = element_text(angle=90, hjust = 1))
+theme(axis.text.x = element_text(angle=90, hjust = 1)) +
+  theme_minimal()
 ```
 
 ---
@@ -540,7 +541,7 @@ dataset_student_long <- melt(filter(bristol, age=="18_24"), id.vars = c("date")
 #https://www.uwe.ac.uk/study/term-dates/2021-22-term-dates
 #https://www.uwe.ac.uk/study/term-dates/2022-23-term-dates
 ggplot(data = dataset_student_long,
-       aes(x=date, y=Count, colour=Dose)) +
+       aes(x=date, y=Count)) +
     geom_rect(aes(xmin = as.Date("2020-10-19"),
             xmax = as.Date("2021-01-22"),
                 ymin = -Inf, ymax = Inf, fill = '20/21 Teaching Block 1: Autumn Term'), alpha = .2)+
