@@ -26,6 +26,9 @@ classoption: landscape
 ```{r child = 'DatasetBristol.Rmd'}
 ```
 \newpage
+```{r child = 'DatasetEngland.Rmd'}
+```
+\newpage
 ```{r child = 'ML.Rmd'}
 ```
 \newpage
