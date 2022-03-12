@@ -52,11 +52,15 @@ dataset = rename(dataset,
 dataset <- dataset[c("age", "date", "First", "Second", "Third")]
 ```
 
+Look at the dataset.
+
 ```{r, echo=FALSE}
 age_ord <- unique(dataset["age"])
 dataset$Age <- which(age_ord == dataset$age)
 kable(head(dataset))
 ```
+
+Using the k-means clustering model, we find out that sometimes a lot of people in the same age group got their jabs together. And the group 18-24 is not an exception.
 
 ```{r, include=FALSE}
 y_column = "First"
