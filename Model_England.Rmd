@@ -61,10 +61,12 @@ england <- england[c("Date", "First", "Second", "Third")]
 
 england$Third <- england$Third %>% replace_na(0)
 
+england$All <- england$First + england$Second + england$Third
+
 kable(head(england))
 ```
 ```{r, include=FALSE}
-FitColumn <- "First"
+FitColumn <- "All"
 ```
 
 ```{r england_plot, echo=FALSE}
@@ -92,9 +94,9 @@ summary(fit)
 ARIMA(5, 1, 3)
 ARIMA(p,d,q)
 
-* p - is the order of Auto-regressive or linear model
+* p – is the order of Auto-regressive or linear model
 * q – is the order of Moving Average/ number of lagged values
-* d- difference value to make the time series stationary from non-stationary.
+* d – difference value to make the time series stationary from non-stationary.
 If the data is stationary, then d=0. So, I was right earlier.
 
 ```{r, echo=FALSE}
@@ -115,7 +117,7 @@ pacf(englandFit)
 #The partial autocorrelation function is similar to the ACF except that it displays only the correlation between two observations that the shorter lags between those observations do not explain. 
 ```
 
-The residuals in ARIMA models tell a story about the performance of your model and should be taken into consideration when evaluating them. The functions checkresiduals, ACF and PACF make it easy to keep track of the information left behind in the residuals by your model. <https://towardsdatascience.com/time-series-analysis-with-auto-arima-in-r-2b220b20e8ab>
+The residuals in ARIMA models tell a story about the performance of your model and should be taken into consideration when evaluating them. The functions checkresiduals, ACF and PACF make it easy to keep track of the information left behind in the residuals by your model. [(link)](https://towardsdatascience.com/time-series-analysis-with-auto-arima-in-r-2b220b20e8ab>)
 
 ```{r fit_residuals, echo=FALSE}
 checkresiduals(fit)
