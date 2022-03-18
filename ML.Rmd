@@ -396,7 +396,7 @@ feature_columns = ["Weekday", "Year", "DayOfYear"]
 <<plot_all>>
 ```
 
-The result is better a little, but extreme values are disappointed.
+The result is better a little, but extreme values are disappointing.
 
 Also, I suggest checking the model with columns that we discussed during the correlations search.
 

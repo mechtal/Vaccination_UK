@@ -35,3 +35,6 @@ classoption: landscape
 ```{r child = 'ML_Bristol.Rmd'}
 ```
 \newpage
+```{r child = 'Model_England.Rmd'}
+```
+\newpage
