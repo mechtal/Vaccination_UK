@@ -10,11 +10,11 @@ classoption: landscape
 ---
 # Step 3 Look at the datasets
 
-```{r, include=FALSE}
+```{r DatasetSouthWestPaths, include=FALSE}
 path = "/Users/travel_mechtal/Documents/UWE/Portfolio/"
 ```
 
-```{r Dataset_Region_Libraries, include=FALSE}
+```{r DatasetSouthWestLibraries, include=FALSE}
 #---------------------------------------
 # knitr -- create pretty tables for a presentation
 #---------------------------------------
@@ -62,16 +62,16 @@ if(!require(psych)){install.packages("psych")}
 library(psych)
 ```
 
-```{r, include=FALSE}
+```{r DatasetSouthWestRFunctions, include=FALSE}
 # for pretty tables
 source("my_kable.R")
 ```
 
-## Region {#region}
+## South West {#DatasetSouthWest}
 
 As we can see on the website, Region metrics are available for regions of England. I am interested in the South West and metrics that start with "New":
 
-```{r, echo=FALSE}
+```{r DatasetSouthWest, echo=FALSE}
 region_set <- read.csv(paste(path,"region_2022-01-27.csv",sep=""),
                          header = TRUE,
                          sep = ","
@@ -99,7 +99,7 @@ Let's prepare data for the plotting.
 
 - Rename columns and columns
 
-```{r, include=FALSE}
+```{r DatasetSouthWestNewNames, include=FALSE}
 # rename columns
 region_set = rename(region_set, 
        First = newPeopleVaccinatedFirstDoseByVaccinationDate
@@ -110,7 +110,7 @@ region_set = rename(region_set,
 
 - Add the column MonthYear
 
-```{r, include=FALSE}
+```{r DatasetSouthWestNewColumnMonthYear, include=FALSE}
 # add columns
 MonthYear <- c(c(paste(1:12,2020,sep=".")), c(paste(1:12,2021,sep=".")), c(paste(1:12,2022,sep=".")))
 region_set$MonthYear <- factor(paste(month(region_set$date), year(region_set$date), sep=".")
@@ -119,7 +119,7 @@ region_set$MonthYear <- factor(paste(month(region_set$date), year(region_set$dat
 
 - Create long table
 
-```{r, include=FALSE}
+```{r DatasetSouthWestLong, include=FALSE}
 # add the long verstion
 region_set_long <- melt(region_set
                        , id.vars = c("date", "MonthYear")
@@ -132,16 +132,18 @@ region_set_long <- melt(region_set
                     )
 ```
 
-```{r, echo=FALSE}
+```{r DatasetSouthWestLongHead, echo=FALSE}
 kable(head(region_set_long))
 ```
 Let's plot something.
 
-```{r, include=FALSE}
+```{r DatasetSouthWestLongVariables, include=FALSE}
 myFirst <- as.Date("2021-08-08", format="%Y-%m-%d")
 mySecond <- as.Date("2021-10-03", format="%Y-%m-%d")
 myThird <- as.Date("2022-01-08", format="%Y-%m-%d")
+```
 
+```{r DatasetSouthWestLongFilter, include=FALSE}
 region_set_long_period <- filter(region_set_long, date >= as.Date("2021-07-01", format = "%Y-%m-%d"))
 ```
 
@@ -150,7 +152,7 @@ region_set_long_period <- filter(region_set_long, date >= as.Date("2021-07-01", 
 ```{r ref0, ref.label='q0', render=pander::pander, echo=FALSE}
 ```
 
-```{r AllDosesPlot, echo=FALSE, fig.cap = "\\label{fig:AllDosesPlot} My caption"}
+```{r DatasetSouthWestAllDosesPlot, echo=FALSE, fig.cap = "\\label{fig:AllDosesPlot} My caption"}
 ggplot(data = region_set_long_period
        , aes(x=date
              , y=Count
@@ -169,7 +171,7 @@ The result is not beautiful because of the active growth of the third jabs count
 Let's plot them separately.
 
 \newpage
-```{r,echo=FALSE}
+```{r DatasetSouthWestFirst, echo=FALSE}
 ggplot(data = filter(region_set_long_period, Dose == "First")
        , aes(x=date
              , y=Count
@@ -190,7 +192,7 @@ geom_vline(xintercept = myFirst, color = "red") +
 It is so interesting why the graph is wavy. $`r filter(region_set, date==myFirst)["First"]`$ people got their first jabs with me.
 
 \newpage
-```{r, echo=FALSE}
+```{r DatasetSouthWestSecond, echo=FALSE}
 ggplot(data = filter(region_set_long_period, Dose == "Second")
        , aes(x=date
              , y=Count
@@ -211,7 +213,7 @@ geom_vline(xintercept = mySecond, color = "red") +
 $`r filter(region_set, date==mySecond)["Second"]`$ people got their second jabs with me.
 
 \newpage
-```{r, echo=FALSE}
+```{r DatasetSouthWestThird, echo=FALSE}
 ggplot(data = filter(region_set_long_period, Dose == "Third")
        , aes(x=date
              , y=Count
@@ -235,14 +237,14 @@ We can see when the active phase of vaccination by the third dose started.
 
 Let's calculate the date. ("2021-09-17")
 
-```{r, include=FALSE}
+```{r DatasetSouthWestLongSummarise, include=FALSE}
 region_set_long_agg <- region_set_long[,c("MonthYear", "Dose", "Count")] %>%
 group_by(MonthYear, Dose) %>%
 summarise(Count=sum(Count), na.rm = TRUE)
 ```
 
 \newpage
-```{r DosesWaves, fig.cap = "\\label{fig:DosesWaves} My caption", echo=FALSE}
+```{r DatasetSouthWestDosesWaves, fig.cap = "\\label{fig:DosesWaves} My caption", echo=FALSE}
 ggplot(data = region_set_long_agg, 
 aes(x=MonthYear, 
 y=Count, 
@@ -256,14 +258,14 @@ theme(axis.text.x = element_text(angle=90, hjust = 1))
 \newpage
 ### Zeroes
 
-```{r ZeroSet, echo=FALSE, warning=FALSE}
+```{r DatasetSouthWestZeroSet, echo=FALSE, warning=FALSE}
 region_set_long <- region_set_long %>% mutate(zero =
            case_when(Count == 0 ~ "0", 
                      Count > 0 ~ "> 0")        
            )          
 ```
 
-```{r ZeroPlot, echo=FALSE, fig.align = "center", fig.height = 3, fig.width = 12, message = FALSE}
+```{r DatasetSouthWestZeroPlot, echo=FALSE, fig.align = "center", fig.height = 3, fig.width = 12, message = FALSE}
 ggplot(region_set_long %>%
         group_by(Dose, zero) %>%
         summarise(zero_count=length(Count))
@@ -279,20 +281,20 @@ Also, we can see missing values for the column "Third"; in our case, missing val
 
 Replace missing values.
 
-```{r, include=FALSE}
+```{r DatasetSouthWestLongNA, include=FALSE}
 region_set_long[is.na(region_set_long)] <- 0
 ```
 
 \newpage
 ### Data description
 
-```{r, include=FALSE}
+```{r DatasetSouthWestDesc, include=FALSE}
 dataset_desc <- describe(region_set[,c("First", "Second", "Third")], IQR=TRUE, quant=c(.25,.75,.90))
 ```
 
 _Median, percentiles and mean_
 
-```{r, echo=FALSE, eval=TRUE, echo=FALSE}
+```{r DatasetSouthWestDescPart1, echo=FALSE, eval=TRUE, echo=FALSE}
 kable(dataset_desc[, c("mean", "median", "Q0.25", "Q0.75", "Q0.9")])
 ```
 
@@ -302,15 +304,15 @@ What can I say?
 
 - For the Third dose, half of the values are below $`r dataset_desc["Third", "median"]`$. That is not surprised. In the beginning, people needed to get two jabs.
 
-- If we look at "Q0.25", "Q0.75", "Q0.90", we find out that the Third dose's wave caught up with other doses' waves quickly. We already saw this fact on the plot \@ref(fig:AllDosesPlot).
-```{r, include=FALSE}
+- If we look at "Q0.25", "Q0.75", "Q0.90", we find out that the Third dose's wave caught up with other doses' waves quickly. We already saw this fact on the plot \@ref(fig:DatasetSouthWestAllDosesPlot).
+```{r DatasetSouthWestMeanMedianDataset, include=FALSE}
 a_mean <- region_set_long %>% 
   group_by(Dose) %>% 
   summarize(mean_val = mean(Count),
             median_val = median(Count))
 ```
 
-```{r, echo=FALSE, fig.align = "center"}
+```{r DatasetSouthWestHistogram, echo=FALSE, fig.align = "center"}
 region_set_long %>%
 ggplot(aes(x=Count, fill=Dose)) +
   geom_histogram(color="#e9ecef", bins = 15, position = 'identity') +
@@ -321,7 +323,7 @@ ggplot(aes(x=Count, fill=Dose)) +
 ```
 _Standard deviation (sd), IQR and range_
 
-```{r, echo=FALSE, eval=TRUE, echo=FALSE}
+```{r DatasetSouthWesxtDescPart2, echo=FALSE, eval=TRUE, echo=FALSE}
 kable(dataset_desc[,c("sd", "range", "IQR")])
 ```
 IQR and standard deviation for each dose are big, consequently, the data spread out.
