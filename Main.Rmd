@@ -20,7 +20,7 @@ classoption: landscape
 ```{r child = 'Questions.Rmd'}
 ```
 \newpage
-```{r child = 'DatasetRegion.Rmd'}
+```{r child = 'DatasetSouthWest.Rmd'}
 ```
 \newpage
 ```{r child = 'DatasetBristol.Rmd'}
@@ -29,12 +29,12 @@ classoption: landscape
 ```{r child = 'DatasetEngland.Rmd'}
 ```
 \newpage
-```{r child = 'ML.Rmd'}
+```{r child = 'ModelSouthWest.Rmd'}
 ```
 \newpage
-```{r child = 'ML_Bristol.Rmd'}
+```{r child = 'ModelBristol.Rmd'}
 ```
 \newpage
-```{r child = 'Model_England.Rmd'}
+```{r child = 'ModelEngland.Rmd'}
 ```
 \newpage
