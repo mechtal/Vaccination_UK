@@ -9,9 +9,9 @@ header-includes:
    - \floatsetup[figure]{capposition=top}
 classoption: landscape
 ---
-## Bristol {#bristol}
+## Bristol {#DatasetBristol}
 
-```{r DatasetBristolRLibraries, include=FALSE}
+```{r DatasetBristolLibraries, include=FALSE}
 #---------------------------------------
 # ggplot2 -- plot
 #---------------------------------------
@@ -44,12 +44,10 @@ if(!require(reshape2)){install.packages("reshape2")}
 library(reshape2)
 ```
 
-```{r, include=FALSE}
+```{r DatasetBristolRFunctions, include=FALSE}
 # for pretty tables
 source("my_kable.R")
-```
 
-```{r DatasetBristolRFunctions, include=FALSE}
 conclusion <- function(dose, myAge, dataset) {
   return(paste(
           filter(dataset, date==get(paste("my", dose, sep='')) & age==myAge)[dose],
@@ -61,11 +59,11 @@ conclusion <- function(dose, myAge, dataset) {
 }
 ```
 
-```{r, include=FALSE}
+```{r DatasetBristolPaths, include=FALSE}
 path = "/Users/travel_mechtal/Documents/UWE/Portfolio/"
 ```
 
-```{r, include=FALSE}
+```{r DatasetBristol, include=FALSE}
 dataset <- read.csv(paste(path,"ltla_2022-02-10.csv",sep=""),
                          header = TRUE,
                          sep = ","
@@ -77,7 +75,7 @@ dataset$date <- as.Date(dataset$date,format = '%Y-%m-%d')
 
 The dataset's columns:
 
-```{r, echo=FALSE}
+```{r DatasetBristolColumns, echo=FALSE}
 my_kable(colnames(dataset))
 ```
 
@@ -87,7 +85,7 @@ There are $`r n_distinct(dataset["areaCode"])`$ unique value for **areaCode**, $
 So, we do not need to look at them in the future because these columns are used for filtering that we have already done on the website.
 
 Just rename columns and we will move on to answer the questions.
-```{r, echo=FALSE}
+```{r DatasetBristolNewNames, echo=FALSE}
 dataset = rename(dataset, 
        First = newPeopleVaccinatedFirstDoseByVaccinationDate
        ,Second = newPeopleVaccinatedSecondDoseByVaccinationDate
@@ -99,18 +97,18 @@ dataset <- dataset[c("age", "date", "First", "Second", "Third")]
 kable(head(dataset))
 ```
 
-```{r, include=FALSE}
+```{r DatasetBristolVariables, include=FALSE}
 myFirst <- as.Date("2021-08-08", format="%Y-%m-%d")
 mySecond <- as.Date("2021-10-03", format="%Y-%m-%d")
 myThird <- as.Date("2022-01-08", format="%Y-%m-%d")
 myAge <- "25_29"
 ```
 
-```{r, include=FALSE}
+```{r DatasetBristolFirst, include=FALSE}
 dose = "First"
 ```
 
-```{r BristolAgePlot,  fig.height = 10, fig.width = 12, fig.align = "center", echo=FALSE}
+```{r DatasetBristolAgePlot,  fig.height = 10, fig.width = 12, fig.align = "center", echo=FALSE}
 ggplot(data = dataset, 
        aes_string(x="date", 
            y=dose,
@@ -120,29 +118,29 @@ ggplot(data = dataset,
   facet_grid(age ~ .) +
   geom_vline(xintercept = get(paste("my", dose, sep='')), color = "red")
 ```
-```{r conclusion, render=pander::pander, echo=FALSE}
+```{r DatasetBristolFirstConlusion, render=pander::pander, echo=FALSE}
 conclusion(dose, myAge, dataset)
 ```
 
-```{r, echo=FALSE, fig.height = 10, fig.width = 12, fig.align = "center"}
+```{r DatasetBristolSecond, echo=FALSE, fig.height = 10, fig.width = 12, fig.align = "center"}
 dose <- "Second"
-<<BristolAgePlot>>
+<<DatasetBristolAgePlot>>
 ```
-```{r, echo=FALSE, render=pander::pander}
+```{r DatasetBristolSecondConclusion, echo=FALSE, render=pander::pander}
 conclusion(dose, myAge, dataset)
 ```
 
-```{r, echo=FALSE, fig.height = 10, fig.width = 12, fig.align = "center"}
+```{r DatasetBristolThird, echo=FALSE, fig.height = 10, fig.width = 12, fig.align = "center"}
 dose <- "Third"
-<<BristolAgePlot>>
+<<DatasetBristolAgePlot>>
 ```
 
-```{r, echo=FALSE, render=pander::pander}
+```{r DatasetBristolThirdConclusion, echo=FALSE, render=pander::pander}
 conclusion(dose, myAge, dataset)
 ```
 
 **Students**
-```{r, include=FALSE}
+```{r DatasetBristolStudentLongDataset, include=FALSE}
 dataset_student_long <- melt(filter(dataset, age=="18_24"), id.vars = c("date")
                        , measure.vars = c("First", "Second", "Third")
                        , variable.name = "Dose"
@@ -150,7 +148,7 @@ dataset_student_long <- melt(filter(dataset, age=="18_24"), id.vars = c("date")
                     )
 ```
 
-```{r, echo=FALSE}
+```{r DatasetBristolStudentPlot, echo=FALSE}
 ggplot(data = dataset_student_long,
        aes(x=date, y=Count)) +
     geom_rect(aes(xmin = as.Date("2020-10-19"),
