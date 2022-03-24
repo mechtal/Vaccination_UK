@@ -8,9 +8,9 @@ header-includes:
    - \floatsetup[figure]{capposition=top}
 classoption: landscape
 ---
-## England {#england}
+## England {#DatasetEngland}
 
-```{r, include=FALSE}
+```{r DatasetEnglandLibraries, include=FALSE}
 #---------------------------------------
 # knitr -- create pretty tables for a presentation
 #---------------------------------------
@@ -58,12 +58,12 @@ if(!require(reshape2)){install.packages("reshape2")}
 library(reshape2)
 ```
 
-```{r, include=FALSE}
+```{r DatasetEnglandRFunctions, include=FALSE}
 source("my_kable.r")
 ```
 
 Look at the dataset's columns.
-```{r, echo=FALSE}
+```{r DatasetEngland, echo=FALSE}
 england <- read.csv("/Users/travel_mechtal/Documents/UWE/Portfolio/nation_2022-03-10.csv", header = TRUE, sep = ",")
 
 my_kable(colnames(england))
@@ -71,12 +71,13 @@ my_kable(colnames(england))
 We are not going to look at the columns areaCode, areaName, areaType, because these columns have one unique value ($`r unique(england["areaCode"])`$ for areaCode, $`r unique(england["areaName"])`$ for areaName, $`r unique(england["areaType"])`$ for areaType), they are used for filtering on the website.
 
 Rename columns and exclude unnecessary columns.
-
-```{r, echo=FALSE}
+```{r DatasetEnglandNewColumnDate, include=FALSE}
 england$Date <- as.Date(england$date, format = "%Y-%m-%d")
 
 england <- england[order(england$Date),]
+```
 
+```{r DatasetEnglandNewNames, echo=FALSE}
 england = rename(england, 
        First = newPeopleVaccinatedFirstDoseByVaccinationDate
        ,Second = newPeopleVaccinatedSecondDoseByVaccinationDate
@@ -91,36 +92,36 @@ kable(head(england))
 I want to be sure that the file has statistics for every day.
 
 - Add the column with difference between the date and the previous date within the table.
-```{r, include=FALSE}
+```{r DatasetEnglandNewColumnDiffdate, include=FALSE}
 # replce na for the first date by the previous date for the first date
 england$Diffdate <- england$Date - replace_na(lag(england$Date), min(england$Date) - 1)
 ```
 The difference between dates is $`r unique(england["Diffdate"])`$. So, we have full statistics by date.
 
 Do we have missing values?
-```{r, echo=FALSE}
+```{r DatasetEnglandNA, echo=FALSE}
 # count of missing values per column
 kable(colSums(is.na(england)), col.names = NULL)
 ```
 
-```{r, echo=FALSE, fig.height = 5, fig.width = 10, fig.align = "center"}
+```{r DatasetEnglandNAPlot, echo=FALSE, fig.height = 5, fig.width = 10, fig.align = "center"}
 vis_miss(england)
 ```
 Yes, we have missing values in the column "Third". In this case, missing values and zeroes are equivalent.
 
 Replace by zero.
 
-```{r, include=FALSE}
+```{r DatasetEnglandNAReplacing, include=FALSE}
 england$Third <- england$Third %>% replace_na(0)
 ```
 
-```{r, include=FALSE}
+```{r DatasetEnglandVariables, include=FALSE}
 myFirst <- as.Date("2021-08-08", format="%Y-%m-%d")
 mySecond <- as.Date("2021-10-03", format="%Y-%m-%d")
 myThird <- as.Date("2022-01-08", format="%Y-%m-%d")
 ```
 
-```{r, include=FALSE}
+```{r DatasetEnglandLong, include=FALSE}
 england_long <- melt(england, id.vars = c("Date")
                        , measure.vars = c("First", "Second", "Third")
                        , variable.name = "Dose"
@@ -128,13 +129,13 @@ england_long <- melt(england, id.vars = c("Date")
                     )
 ```
 
-```{r, include=FALSE}
+```{r DatasetEnglandMyDataset, include=FALSE}
 myData <- filter(england_long, Dose=="First" & Date==myFirst |
                      Dose=="Second" & Date==mySecond |
                      Dose=="Third" & Date==myThird )
 ```
 
-```{r, include=FALSE}
+```{r DatasetEnglandMaxDataset, include=FALSE}
 maxData <- england_long %>%
   group_by(Dose) %>%
   top_n(1, Count)
@@ -142,10 +143,10 @@ maxData <- england_long %>%
 
 I have a question.
 
-```{r ref0, ref.label='q1', render=pander::pander, echo=FALSE}
+```{r DatasetEnglandRef1, ref.label='q1', render=pander::pander, echo=FALSE}
 ```
 
-```{r, echo=FALSE, fig.height = 8, fig.width = 12, fig.align = "center"}
+```{r DatasetEnglandAllDosesPlot, echo=FALSE, fig.height = 8, fig.width = 12, fig.align = "center"}
 ggplot(england_long, aes(x=Date, y=Count)) +
   geom_line() +
   geom_point(data=maxData) +

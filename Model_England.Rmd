@@ -8,9 +8,9 @@ header-includes:
    - \floatsetup[figure]{capposition=top}
 classoption: landscape
 ---
-## Model for England {#model_england}
+## England {#ModelEngland}
 
-```{r, include=FALSE}
+```{r ModelEnglandLibraries, include=FALSE}
 #---------------------------------------
 # knitr -- create pretty tables for a presentation
 #---------------------------------------
@@ -44,7 +44,7 @@ library(ggplot2)
 ```
 
 Look at the dataset.
-```{r, echo=FALSE}
+```{r ModelEnglandDataset, echo=FALSE}
 england <- read.csv("/Users/travel_mechtal/Documents/UWE/Portfolio/nation_2022-03-10.csv", header = TRUE, sep = ",")
 
 england$Date <- as.Date(england$date, format = "%Y-%m-%d")
@@ -65,11 +65,11 @@ england$All <- england$First + england$Second + england$Third
 
 kable(head(england))
 ```
-```{r, include=FALSE}
+```{r ModelEnglandAll, include=FALSE}
 FitColumn <- "All"
 ```
 
-```{r england_plot, echo=FALSE}
+```{r ModelEnglandPlot, echo=FALSE}
 ggplot(england, aes_string(x="Date", y=FitColumn)) +
   geom_line() +
   scale_y_continuous(labels = scales::comma)
@@ -79,16 +79,16 @@ What can we say?
 
 There is a not stationary time series, as the series wanders up and down for long periods.
 
-```{r england_fit, include=FALSE}
+```{r ModelEnglandTimeSeries, include=FALSE}
 englandFit <- ts(data=england[FitColumn], frequency = 1)
 autoplot(englandFit)
 ```
 
-```{r fit, include=FALSE}
+```{r ModelEnglandArima, include=FALSE}
 fit <- auto.arima(englandFit)
 ```
 
-```{r fit_summary, echo=FALSE}
+```{r ModelEnglandArimaSummary, echo=FALSE}
 summary(fit)
 ```
 ARIMA(5, 1, 3)
@@ -99,7 +99,7 @@ ARIMA(p,d,q)
 * d – difference value to make the time series stationary from non-stationary.
 If the data is stationary, then d=0. So, I was right earlier.
 
-```{r, echo=FALSE}
+```{r ModelEnglandTimeSeriesAcf, echo=FALSE}
 acf(englandFit)
 ```
 
@@ -111,7 +111,7 @@ So,
 * the autocorrelations decline slowly.
 * When a time series has both a trend and seasonality, the ACF plot displays a mixture of both effects. Notice how you can see the wavy correlations for the seasonal pattern and the slowly diminishing lags of a trend.
 
-```{r, include=FALSE}
+```{r ModelEnglandTimeSeriesPacf, include=FALSE}
 pacf(englandFit)
 #The first difference is really important
 #The partial autocorrelation function is similar to the ACF except that it displays only the correlation between two observations that the shorter lags between those observations do not explain. 
@@ -119,56 +119,18 @@ pacf(englandFit)
 
 The residuals in ARIMA models tell a story about the performance of your model and should be taken into consideration when evaluating them. The functions checkresiduals, ACF and PACF make it easy to keep track of the information left behind in the residuals by your model. [(link)](https://towardsdatascience.com/time-series-analysis-with-auto-arima-in-r-2b220b20e8ab>)
 
-```{r fit_residuals, echo=FALSE}
+```{r ModelEnglandArimaCheckResiduals, echo=FALSE}
 checkresiduals(fit)
 ```
 
-```{r, include=FALSE}
-acf(fit$residuals)
-pacf(fit$residuals)
-autoplot(fit$residuals)
-#well behaved (?), constant variance over time
-mean(fit$residuals)
-```
-
-```{r fit_forecast_plot, echo=FALSE}
+```{r ModelEnglandArimaForecast, echo=FALSE}
 autoplot(forecast(fit))
 ```
 
-```{r}
+```{r ModelEnglandArimaForecastLower, echo=FALSE}
 forecast(fit)$lower
 ```
 
-```{r}
+```{r ModelEnglandArimaForecastUpper, echo=FALSE}
 forecast(fit)$upper[1,]
-```
-
-```{r, include=FALSE}
-log(englandFit)[1,0]
-autoplot(log(englandFit))
-fit2 <- auto.arima(log(englandFit))
-checkresiduals(fit2)
-#look any better (?)
-#smooth out (?)
-#capture seasonality (?)
-```
-
-```{r, include=FALSE}
-FitColumn <- "Second"
-<<england_plot>>
-<<england_fit>>
-<<fit>>
-<<fit_summary>>
-<<fit_residuals>>
-<<fit_forecast_plot>>
-```
-
-```{r, include=FALSE}
-FitColumn <- "Third"
-<<england_plot>>
-<<england_fit>>
-<<fit>>
-<<fit_summary>>
-<<fit_residuals>>
-<<fit_forecast_plot>>
 ```

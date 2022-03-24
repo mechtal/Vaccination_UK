@@ -12,7 +12,7 @@ classoption: landscape
 ---
 ## Bristol
 
-```{r BristolRLibraries, include=FALSE}
+```{r ModelBristolLibraries, include=FALSE}
 #---------------------------------------
 # ggplot2 -- plot
 #---------------------------------------
@@ -30,11 +30,11 @@ if(!require(knitr)){install.packages("knitr")}
 library(knitr)
 ```
 
-```{r, include=FALSE}
+```{r ModelBristolPaths, include=FALSE}
 path = "/Users/travel_mechtal/Documents/UWE/Portfolio/"
 ```
 
-```{r, include=FALSE}
+```{r ModelBristolDataset, include=FALSE}
 dataset <- read.csv(paste(path,"ltla_2022-02-10.csv",sep=""),
                          header = TRUE,
                          sep = ","
@@ -54,7 +54,7 @@ dataset <- dataset[c("age", "date", "First", "Second", "Third")]
 
 Look at the dataset.
 
-```{r, echo=FALSE}
+```{r ModelBristolDatasetHead, echo=FALSE}
 age_ord <- unique(dataset["age"])
 dataset$Age <- which(age_ord == dataset$age)
 kable(head(dataset))
@@ -62,11 +62,11 @@ kable(head(dataset))
 
 Using the k-means clustering model, we find out that sometimes a lot of people in the same age group got their jabs together. And the group 18-24 is not an exception.
 
-```{r, include=FALSE}
+```{r ModelBristolFirst, include=FALSE}
 y_column = "First"
 ```
 
-```{r kmeans, echo=FALSE}
+```{r ModelBristolKmeans, echo=FALSE}
 cls <- kmeans(x = data.matrix(dataset[,c("Age", y_column)]), centers = 5)
 dataset$cluster <- as.character(cls$cluster)
 
@@ -78,12 +78,12 @@ ggplot() +
 theme(axis.text.x = element_text(angle=90, hjust = 1))
 ```
 
-```{r, echo=FALSE}
+```{r ModelBristolSecond, echo=FALSE}
 y_column = "Second"
-<<kmeans>>
+<<ModelBristolKmeans>>
 ```
 
-```{r, echo=FALSE}
+```{r ModelBristolThird, echo=FALSE}
 y_column = "Third"
-<<kmeans>>
+<<ModelBristolKmeans>>
 ```

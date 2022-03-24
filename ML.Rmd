@@ -17,7 +17,7 @@ classoption: landscape
 ### Look at and Modify the dataset
 So, I am curious. Can I predict vaccination data?
 
-```{r python, include=FALSE}
+```{r ModelSouthWestLibrariesForPython, include=FALSE}
 # Setting for using python
 library(tidyverse)
 library(reticulate)
@@ -29,7 +29,7 @@ use_condaenv("base", required = TRUE)
 # I already installed: pandas, networkx, typing_extensions, joblib, seaborn, scikit-learn
 ```
 
-```{python python_libraries, include=FALSE}
+```{python ModelSouthWestPythonLibraries, include=FALSE}
 # work with dataframes
 import pandas as pd
 # work with dates
@@ -49,7 +49,7 @@ from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import RandomForestRegressor
 ```
 
-```{r ML_r_libraries, include=FALSE}
+```{r ModelSouthWestLibraries, include=FALSE}
 #---------------------------------------
 # ggplot2 -- plot
 #---------------------------------------
@@ -74,12 +74,12 @@ if(!require(kableExtra)){install.packages("kableExtra")}
 library(kableExtra)
 ```
 
-```{r, include=FALSE}
+```{r ModelSouthWestRFunctions, include=FALSE}
 # for pretty tables
 source("my_kable.R")
 ```
 
-```{python read_data, include=FALSE}
+```{python ModelSouthWestDataset, include=FALSE}
 # read file
 path = "/Users/travel_mechtal/Documents/UWE/Portfolio/"
 data=pd.read_csv(path + "region_2022-01-27.csv", index_col="date", parse_dates=True)
@@ -99,11 +99,11 @@ dataset = dataset.fillna(0)
 ```
 
 I will work with the South West's vaccination data.
-```{r DataRegions, eval=TRUE, echo=FALSE}
+```{r ModelSouthWestDatasetHead, eval=TRUE, echo=FALSE}
 kable(py$dataset[1:10,])
 ``` 
 
-```{python DataRegions_all_years, fig.align = "center", echo=FALSE}
+```{python ModelSouthWestAllYearsPlot, fig.align = "center", echo=FALSE}
 plt.figure(figsize=(20,12))
 sns.heatmap(data=
             dataset.sort_index())
@@ -116,7 +116,7 @@ Let's get features:
 3) Day
 etc.
 
-```{python DateFeatures, include=FALSE}
+```{python ModelSouthWestDatasetNewColumns, include=FALSE}
 dataset['Year'] = dataset.index.year
 dataset['Month'] = dataset.index.month
 dataset['Day'] = dataset.index.day
@@ -127,7 +127,7 @@ dataset['IsMonthStart'] = dataset.index.is_month_start
 dataset['IsMonthEnd'] = dataset.index.is_month_end
 ```
 
-```{r DataRegionsWithFeatures, ref.label=c('DataRegions'), echo=FALSE}
+```{r ModelSouthWestDatasetHeadWithFeatures, ref.label=c('ModelSouthWestDatasetHead'), echo=FALSE}
 ```
 
 First of all, I am going to use Regression Machine Learning models: 
@@ -167,12 +167,12 @@ Let's look at the dataset carefully.
 
 ### Explore the dataset
 
-In the previous chapter \@ref(region), we already looked at the South West's data. Do we need to know something else? Yes.
+In the previous chapter \@ref(DatasetSouthWest), we already looked at the South West's data. Do we need to know something else? Yes.
 
 #### Data types
 
 It is important to know which types of data columns have. Sometimes we don’t realise what we see: the string or the number.
-```{r, echo=FALSE, eval=TRUE, echo=FALSE}
+```{r ModelSouthWestDatasetTypes, echo=FALSE, eval=TRUE, echo=FALSE}
 kable(sapply(py$dataset, typeof), col.names = NULL)
 ```
 
@@ -185,7 +185,7 @@ We will move on to correlations.
 
 What do we need to remember? Correlation does not imply causation. So, the columns that have a strong relationship may show low accuracy in the model.
 
-```{r, echo=FALSE, fig.align = "center"}
+```{r ModelSouthWestCorrelationsPlot, echo=FALSE, fig.align = "center"}
 melted_cormat <- melt(cor(py$dataset))
 ggplot(data = filter(melted_cormat, Var1 %in% c("First", "Second")), aes(x=Var1, y=Var2, fill=value)) + 
   labs(x ="Dose", y = "Date features") +
@@ -199,7 +199,7 @@ ggplot(data = filter(melted_cormat, Var1 %in% c("First", "Second")), aes(x=Var1,
 ```
 
 In the table below, we can see the numeric values.
-```{r, echo=FALSE, fig.align = "center"}
+```{r ModelSouthWestCorrelations, echo=FALSE, fig.align = "center"}
 kable(filter(melted_cormat, Var1 %in% c("First", "Second"), Var2 %in% c("Month", "DayOfYear", "Quarter")), col.names=NULL)
 ```
 
@@ -212,7 +212,7 @@ As we can see, the column "First" has a strong relationship with
 - "Month". 
 
 
-```{r, echo=FALSE}
+```{r ModelSouthWestScatterPlot1, echo=FALSE}
 ggplot(data = py$dataset, 
         aes(x=First, 
         y=Quarter)
@@ -221,7 +221,7 @@ ggplot(data = py$dataset,
 geom_smooth(method="lm", formula='y~x')
 ```
 
-```{r, echo=FALSE}
+```{r ModelSouthWestScatterPlot2, echo=FALSE}
 ggplot(data = py$dataset, 
         aes(x=First, 
         y=DayOfYear)
@@ -230,7 +230,7 @@ ggplot(data = py$dataset,
 geom_smooth(method="lm", formula='y~x')
 ```
 
-```{r, echo=FALSE}
+```{r ModelSouthWestScatterPlot3, echo=FALSE}
 ggplot(data = py$dataset, 
         aes(x=First, 
         y=Month)
@@ -244,12 +244,12 @@ At the same time, the column "Second" doesn't have strong relationships; but we 
 \newpage
 #### Weekdays
 As you remember, I have a question.
-```{r ref0, ref.label='q2', render=pander::pander, echo=FALSE}
+```{r ModelSouthWestRef2, ref.label='q2', render=pander::pander, echo=FALSE}
 ```
 It may be helpful to choose the right features.
 
 Let's answer.
-```{r, echo=FALSE, fig.align = "center"}
+```{r ModelSouthWestWeekdaysPlot, echo=FALSE, fig.align = "center"}
 dataset_weekdays <- 
   py$dataset %>%
   group_by(Weekday)%>%
@@ -281,14 +281,14 @@ That is not illogical because, for example, for me, the side effects go away dur
 \newpage
 #### Missing values
 
-As we already saw in the previous chapter \@ref(region), the column "Third" has missing values, but we can replace them with zeroes. Do we have the dates when nobody got the jab?
+As we already saw in the previous chapter \@ref(DatasetSouthWest), the column "Third" has missing values, but we can replace them with zeroes. Do we have the dates when nobody got the jab?
 
 Calculate a count of dates in the dataset.
-```{python, echo=FALSE}
+```{python ModelSouthWestCheckDates1, echo=FALSE}
 len(dataset.index)
 ```
 Calculate a count of dates between maximum and minimum dates.
-```{python, echo=FALSE}
+```{python ModelSouthWestCheckDates2, echo=FALSE}
 dates = pd.date_range(dataset.index.min(),dataset.index.max(),freq='d')
 len(dates)
 ```
@@ -298,7 +298,7 @@ So, we have finished the dataset exploring. The next steps are about the models.
 
 \newpage
 ### Split sets, train a Machine Learning Model and Evaluate performance
-```{r python_functions, include=FALSE}
+```{r ModelSouthWestPythonFunctions, include=FALSE}
 # function for preparing sets
 source_python('prepare_sets.py')
 # function for training models
@@ -308,22 +308,22 @@ source_python('train_model.py')
 **Define necessary variables**
 
 First of all, I will use all columns that I have.
-```{python all_columns, include=FALSE}
+```{python ModelSouthWestAllColumns, include=FALSE}
 feature_columns = ["Year", "Month", "Day", "DayOfYear", "Weekday", "Quarter", "IsMonthStart", "IsMonthEnd"]
 ```
 
-```{r, echo=FALSE}
+```{r ModelSouthWestAllColumnsView, echo=FALSE}
 my_kable(py$feature_columns)
 ```
 
 **Prepare sets and train models using parameters.**
-```{python first, include=FALSE}
+```{python ModelSouthWestFirst, include=FALSE}
 y_column = "First"
 ```
 
 The first column that I will predict is "First".
 
-```{python train_all, echo=FALSE}
+```{python ModelSouthWestTrainAll, echo=FALSE}
 train_X, val_X, train_y, val_y = prepare_sets(dataset, feature_columns, y_column)
 
 # DecisionTree
@@ -337,13 +337,13 @@ print("RandomForest: ", 1 - mae_rf/dataset[y_column].mean())
 
 Look at the tree
 
-```{python tree_dt, echo=FALSE, fig.align = "center"}
+```{python ModelSouthWestTreeDt, echo=FALSE, fig.align = "center"}
 plt.figure(figsize=(60, 40))
 # feature_columns is defined above
 tree.plot_tree(model_dt, max_depth=2, feature_names=feature_columns)
 ```
 
-```{python tree_rf, echo=FALSE, fig.align = "center"}
+```{python ModelSouthWestTreeRf, echo=FALSE, fig.align = "center"}
 plt.figure(figsize=(60,40))
 # feature_columns is defined above
 tree.plot_tree(model_rf.estimators_[0], max_depth=2, feature_names=feature_columns)
@@ -355,7 +355,7 @@ What can we see?
 
 Finally, look at the result.
 
-```{python plot_all, echo=FALSE, fig.align = "center"}
+```{python ModelSouthWestPlotAll, echo=FALSE, fig.align = "center"}
 plt.figure(figsize=(25,15))
 sns.set_style("darkgrid")
 plt.title('{} ({})'.format("Comparing", y_column))
@@ -385,92 +385,92 @@ Let’s work with the columns that I chose during the dataset exploring.
 - DayOfYear was chosen because of the dependency on dates.
 
 
-```{python my_columns, include=FALSE}
+```{python ModelSouthWestMyColumns, include=FALSE}
 feature_columns = ["Weekday", "Year", "DayOfYear"]
 ```
 
-```{python, echo=FALSE}
-<<train_all>>
+```{python ModelSouthWestTrainMy, echo=FALSE}
+<<ModelSouthWestTrainAll>>
 #<<tree_dt>>
 #<<tree_rf>>
-<<plot_all>>
+<<ModelSouthWestPlotAll>>
 ```
 
 The result is better a little, but extreme values are disappointing.
 
 Also, I suggest checking the model with columns that we discussed during the correlations search.
 
-```{python correlations_columns, include=FALSE}
+```{python ModelSouthWestCorrelationsColumns, include=FALSE}
 feature_columns = ["Month", "DayOfYear", "Quarter"]
 ```
 
-```{python, echo=FALSE}
-<<train_all>>
+```{python ModelSouthWestTrainCorrelations, echo=FALSE}
+<<ModelSouthWestTrainAll>>
 #<<tree_dt>>
 #<<tree_rf>>
-<<plot_all>>
+<<ModelSouthWestPlotAll>>
 ```
 
 Not so good.
 
 **Repeat for the Second**
-```{python second_train, include=FALSE}
+```{python ModelSouthWestSecond, include=FALSE}
 y_column = "Second"
 ```
-```{python, echo=FALSE}
-<<all_columns>>
-<<train_all>>
+```{python ModelSouthWestSecondTrainAll, echo=FALSE}
+<<ModelSouthWestAllColumns>>
+<<ModelSouthWestTrainAll>>
 #<<tree_dt>>
 #<<tree_rf>>
-<<plot_all>>
+<<ModelSouthWestPlotAll>>
 ```
 
 \newpage
-```{python, echo=FALSE}
-<<my_columns>>
-<<train_all>>
+```{python ModelSouthWestSecondTrainMy, echo=FALSE}
+<<ModelSouthWestMyColumns>>
+<<ModelSouthWestTrainAll>>
 #<<tree_dt>>
 #<<tree_rf>>
-<<plot_all>>
+<<ModelSouthWestPlotAll>>
 ```
 
 \newpage
-```{python, echo=FALSE}
-<<correlations_columns>>
-<<train_all>>
+```{python ModelSouthWestSecondTrainCorrelations, echo=FALSE}
+<<ModelSouthWestCorrelationsColumns>>
+<<ModelSouthWestTrainAll>>
 #<<tree_dt>>
 #<<tree_rf>>
-<<plot_all>>
+<<ModelSouthWestPlotAll>>
 ```
 
 **Repeat for Third**
-```{python third_train, include=FALSE}
+```{python ModelSouthWestThird, include=FALSE}
 y_column = "Third"
 ```
-```{python, echo=FALSE}
-<<all_columns>>
-<<train_all>>
+```{python ModelSouthWestThirdTrainAll, echo=FALSE}
+<<ModelSouthWestAllColumns>>
+<<ModelSouthWestTrainAll>>
 #<<tree_dt>>
 #<<tree_rf>>
-<<plot_all>>
+<<ModelSouthWestPlotAll>>
+```
+
+\newpage
+```{python ModelSouthWestThirdTrainMy, echo=FALSE}
+<<ModelSouthWestMyColumns>>
+<<ModelSouthWestTrainAll>>
+#<<tree_dt>>
+#<<tree_rf>>
+<<ModelSouthWestPlotAll>>
 ```
 
 \newpage
 ```{python, echo=FALSE}
-<<my_columns>>
-<<train_all>>
+<<ModelSouthWestCorrelationsColumns>>
+<<ModelSouthWestTrainAll>>
 #<<tree_dt>>
 #<<tree_rf>>
-<<plot_all>>
-```
-
-\newpage
-```{python, echo=FALSE}
-<<correlations_columns>>
-<<train_all>>
-#<<tree_dt>>
-#<<tree_rf>>
-<<plot_all>>
+<<ModelSouthWestPlotAll>>
 ```
 
 A combination of the following features give us the best result: Weekday, Year, DayOfYear.
