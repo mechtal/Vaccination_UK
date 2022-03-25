@@ -1,0 +1,28 @@
+---
+output:
+  bookdown::pdf_document2:
+    toc: no
+---
+# Function location
+```{r FunctionLocation, message=FALSE}
+source("/Users/travel_mechtal/Documents/UWE/Portfolio/Vaccination/Vaccination_UK/my_kable.R")
+```
+
+# Test 1 One column
+```{r OneColumn, include=FALSE}
+dataset <- data.frame(c(1,2,3))
+```
+
+```{r test}
+my_kable(dataset) # without a caption
+my_kable(dataset, "Caption") # with a string as a caption
+my_kable(dataset, 1) # with a number as a caption
+```
+
+# Test 2 Two columns
+```{r TwoColumns}
+dataset <- data.frame(cbind(c(1,2,3), c(4,5,6)))
+```
+
+```{r, ref.label="test"}
+```
