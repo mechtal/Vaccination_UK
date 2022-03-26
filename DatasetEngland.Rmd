@@ -10,65 +10,61 @@ classoption: landscape
 ---
 ## England {#DatasetEngland}
 
+```{r EnglandPaths, include=FALSE}
+path = "/Users/travel_mechtal/Documents/UWE/Portfolio/"
+```
+
 ```{r DatasetEnglandLibraries, include=FALSE}
 #---------------------------------------
-# knitr -- create pretty tables for a presentation
+# Knitting to pdf
 #---------------------------------------
 if(!require(knitr)){install.packages("knitr")}
 library(knitr)
 #---------------------------------------
-# kableExtra -- create pretty tables for a presentation
-#---------------------------------------
 if(!require(kableExtra)){install.packages("kableExtra")}
 library(kableExtra)
 #---------------------------------------
-# tidyr -- replace_na
+# Working with objects
+#---------------------------------------
+if(!require(reshape2)){install.packages("reshape2")}
+library(reshape2) #melt
 #---------------------------------------
 if(!require(tidyr)){install.packages("tidyr")}
-library(tidyr)
-#---------------------------------------
-# dplyr -- lag
+library(tidyr) #replace_na
 #---------------------------------------
 if(!require(dplyr)){install.packages("dplyr")}
-library(dplyr)
+library(dplyr) #lag
 #---------------------------------------
-# ggplot2 -- plots
+# Plotting
 #---------------------------------------
 if(!require(ggplot2)){install.packages("ggplot2")}
 library(ggplot2)
 #---------------------------------------
-# ggExtra -- ggMarginal
-#---------------------------------------
 if(!require(ggExtra)){install.packages("ggExtra")}
-library(ggExtra)
-#---------------------------------------
-# visdat -- vis_miss
+library(ggExtra) #ggMarginal
 #---------------------------------------
 if(!require(visdat)){install.packages("visdat")}
-library(visdat)
-#---------------------------------------
-# naniar -- gg_miss_upset
+library(visdat) #vis_miss
 #---------------------------------------
 if(!require(naniar)){install.packages("naniar")}
-library(naniar)
-#---------------------------------------
-# reshape2 -- melt
-#---------------------------------------
-if(!require(reshape2)){install.packages("reshape2")}
-library(reshape2)
+library(naniar) #gg_miss_upset
 ```
 
 ```{r DatasetEnglandRFunctions, include=FALSE}
+#---------------------------------------
+# My function for a list view
+#---------------------------------------
 source("my_kable.r")
 ```
 
 Look at the dataset's columns.
 ```{r DatasetEngland, echo=FALSE}
-england <- read.csv("/Users/travel_mechtal/Documents/UWE/Portfolio/nation_2022-03-10.csv", header = TRUE, sep = ",")
+# read the dataset
+england <- read.csv(paste0(path, "nation_2022-03-10.csv"), header = TRUE, sep = ",")
 
 my_kable(colnames(england))
 ```
-We are not going to look at the columns areaCode, areaName, areaType, because these columns have one unique value ($`r unique(england["areaCode"])`$ for areaCode, $`r unique(england["areaName"])`$ for areaName, $`r unique(england["areaType"])`$ for areaType), they are used for filtering on the website.
+We are not going to look at the columns areaCode, areaName, areaType, because these columns have one unique value (`r unique(england["areaCode"])` for areaCode, `r unique(england["areaName"])` for areaName, `r unique(england["areaType"])` for areaType), they are used for filtering on the website.
 
 Rename columns and exclude unnecessary columns.
 ```{r DatasetEnglandNewColumnDate, include=FALSE}
@@ -90,13 +86,12 @@ kable(head(england))
 ```
 
 I want to be sure that the file has statistics for every day.
-
-- Add the column with difference between the date and the previous date within the table.
 ```{r DatasetEnglandNewColumnDiffdate, include=FALSE}
+# Add the column with difference between the date and the previous date within the table.
 # replce na for the first date by the previous date for the first date
 england$Diffdate <- england$Date - replace_na(lag(england$Date), min(england$Date) - 1)
 ```
-The difference between dates is $`r unique(england["Diffdate"])`$. So, we have full statistics by date.
+The difference between dates is `r unique(england["Diffdate"])`. So, we have full statistics by date.
 
 Do we have missing values?
 ```{r DatasetEnglandNA, echo=FALSE}
@@ -116,12 +111,14 @@ england$Third <- england$Third %>% replace_na(0)
 ```
 
 ```{r DatasetEnglandVariables, include=FALSE}
+# my vaccination dates
 myFirst <- as.Date("2021-08-08", format="%Y-%m-%d")
 mySecond <- as.Date("2021-10-03", format="%Y-%m-%d")
 myThird <- as.Date("2022-01-08", format="%Y-%m-%d")
 ```
 
 ```{r DatasetEnglandLong, include=FALSE}
+# create a long table
 england_long <- melt(england, id.vars = c("Date")
                        , measure.vars = c("First", "Second", "Third")
                        , variable.name = "Dose"
@@ -130,12 +127,14 @@ england_long <- melt(england, id.vars = c("Date")
 ```
 
 ```{r DatasetEnglandMyDataset, include=FALSE}
+# create the dataset of my vaccination dates
 myData <- filter(england_long, Dose=="First" & Date==myFirst |
                      Dose=="Second" & Date==mySecond |
                      Dose=="Third" & Date==myThird )
 ```
 
 ```{r DatasetEnglandMaxDataset, include=FALSE}
+# create the dataset of max counts
 maxData <- england_long %>%
   group_by(Dose) %>%
   top_n(1, Count)
