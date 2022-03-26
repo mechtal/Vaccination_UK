@@ -8,64 +8,54 @@ header-includes:
    - \floatsetup[figure]{capposition=top}
 classoption: landscape
 ---
-# Step 1 Find dataset
-
-```{r DatasetsLibraries, include=FALSE}
-#---------------------------------------
-# knitr -- create pretty tables for a presentation
-#---------------------------------------
-if(!require(knitr)){install.packages("knitr")}
-library(knitr)
-#---------------------------------------
-# kableExtra -- create pretty tables for a presentation
-#---------------------------------------
-if(!require(kableExtra)){install.packages("kableExtra")}
-library(kableExtra)
-#---------------------------------------
-# jsonlite -- work with json
-#---------------------------------------
-if(!require(jsonlite)){install.packages("jsonlite")}
-library(jsonlite)
-#---------------------------------------
-# tidyverse -- work with objects using %>%, for example
-#---------------------------------------
-if(!require(tidyverse)){install.packages("tidyverse")}
-library(tidyverse)
-#---------------------------------------
-# hash -- use hash
-#---------------------------------------
-if(!require(hash)){install.packages("hash")}
-library(hash)
-#---------------------------------------
-# tinytex -- knit to pdf
-#---------------------------------------
-if(!require(tinytex)){install.packages("tinytex")}
-library(tinytex)
-```
-
-```{r DatasetsRFunctions, include=FALSE}
-# for pretty tables
-source("my_kable.R")
-
-#---------------------------------------
-# Tick if the metrics belongs to the dataset
-#---------------------------------------
-# input: matrix where metrics are rows' indexes, vector_name that is the list of metrics and one of the columns
-# output: matrix that has 1 on cross (metric, vector_name)
-
-show_links <- function(matrix, vector_name) {
-  for(metric in get(vector_name)) {
-    matrix[metric, vector_name] = 1
-  }
-  return(matrix)
-}
-```
-
-* Create a list of metrics for each dataset
+# Choosing datasets
 
 ```{r DatasetsPaths, include=FALSE}
 path = "/Users/travel_mechtal/Documents/UWE/Portfolio/"
 ```
+
+```{r DatasetsLibraries, include=FALSE}
+#---------------------------------------
+# Knitting to pdf
+#---------------------------------------
+if(!require(tinytex)){install.packages("tinytex")}
+library(tinytex)
+#---------------------------------------
+# Creating pretty tables
+#---------------------------------------
+if(!require(knitr)){install.packages("knitr")}
+library(knitr)
+#---------------------------------------
+if(!require(kableExtra)){install.packages("kableExtra")}
+library(kableExtra)
+#---------------------------------------
+# Working with objects
+#---------------------------------------
+# json
+if(!require(jsonlite)){install.packages("jsonlite")}
+library(jsonlite)
+#---------------------------------------
+# hash
+if(!require(hash)){install.packages("hash")}
+library(hash)
+#---------------------------------------
+# %>%
+if(!require(tidyverse)){install.packages("tidyverse")}
+library(tidyverse)
+```
+
+```{r DatasetsRFunctions, include=FALSE}
+#---------------------------------------
+# My function for a list view
+#---------------------------------------
+source("my_kable.R")
+#---------------------------------------
+# My function to show which metrics belong to the dataset
+#---------------------------------------
+source("show_links.R")
+```
+
+* Create a list of metrics for each dataset
 
 ```{r DatasetsVariables, include=FALSE}
 # create dictionary: short area type's name = area type's name
@@ -78,7 +68,7 @@ AreaTypesDict <- hash("ltla"="Lower Tier Local Authority (LTLA)"
                       ,"region"="Region"
                       ,"utla"="Upper Tier Local Authority (UTLA)"
                       )
-
+# create vectors that are named as keys from AreaTypesDict and contain the dataset's metrics
 for(AreaType in keys(AreaTypesDict)){
   # AreaType metrics' file path
   full_path = paste(path, "metrics_", AreaType, ".json", sep="")
