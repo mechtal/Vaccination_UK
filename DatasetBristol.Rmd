@@ -11,43 +11,50 @@ classoption: landscape
 ---
 ## Bristol {#DatasetBristol}
 
+```{r DatasetBristolPaths, include=FALSE}
+path = "/Users/travel_mechtal/Documents/UWE/Portfolio/"
+```
+
 ```{r DatasetBristolLibraries, include=FALSE}
 #---------------------------------------
-# ggplot2 -- plot
-#---------------------------------------
-if(!require(ggplot2)){install.packages("ggplot2")}
-library(ggplot2)
-#---------------------------------------
-# dplyr -- rename
-#---------------------------------------
-if(!require(dplyr)){install.packages("dplyr")}
-library(dplyr)
-#---------------------------------------
-# knitr -- create pretty tables for a presentation
+# Knitting to pdf
 #---------------------------------------
 if(!require(knitr)){install.packages("knitr")}
 library(knitr)
 #---------------------------------------
-# kableExtra -- create pretty tables for a presentation
-#---------------------------------------
 if(!require(kableExtra)){install.packages("kableExtra")}
 library(kableExtra)
 #---------------------------------------
-# psych -- describing data
+# Plotting
+#---------------------------------------
+if(!require(ggplot2)){install.packages("ggplot2")}
+library(ggplot2)
+#---------------------------------------
+# Working with objects
+#---------------------------------------
+if(!require(readr)){install.packages("readr")}
+library(readr) #read_csv
+#---------------------------------------
+# Working with objects
+#---------------------------------------
+if(!require(dplyr)){install.packages("dplyr")}
+library(dplyr) #rename
 #---------------------------------------
 if(!require(psych)){install.packages("psych")}
-library(psych)
-#---------------------------------------
-# reshape2 -- use melt
+library(psych) #describing data
 #---------------------------------------
 if(!require(reshape2)){install.packages("reshape2")}
-library(reshape2)
+library(reshape2) #melt
 ```
 
 ```{r DatasetBristolRFunctions, include=FALSE}
-# for pretty tables
+#---------------------------------------
+# My function for a list view
+#---------------------------------------
 source("my_kable.R")
-
+#---------------------------------------
+# My function for a conclusion
+#---------------------------------------
 conclusion <- function(dose, myAge, dataset) {
   return(paste(
           filter(dataset, date==get(paste("my", dose, sep='')) & age==myAge)[dose],
@@ -59,18 +66,21 @@ conclusion <- function(dose, myAge, dataset) {
 }
 ```
 
-```{r DatasetBristolPaths, include=FALSE}
-path = "/Users/travel_mechtal/Documents/UWE/Portfolio/"
-```
-
 ```{r DatasetBristol, include=FALSE}
-dataset <- read.csv(paste(path,"ltla_2022-02-10.csv",sep=""),
+# read the dataset
+dataset <- read.csv(paste0(path,"ltla_2022-03-25.csv"),
                          header = TRUE,
                          sep = ","
                          )
 
 # change date's format
 dataset$date <- as.Date(dataset$date,format = '%Y-%m-%d')
+
+# choose necessary columns
+dataset <- dataset[,c("date", "age",
+                      "newPeopleVaccinatedFirstDoseByVaccinationDate",
+                      "newPeopleVaccinatedSecondDoseByVaccinationDate",
+                      "newPeopleVaccinatedThirdInjectionByVaccinationDate")]
 ```
 
 The dataset's columns:
@@ -78,11 +88,6 @@ The dataset's columns:
 ```{r DatasetBristolColumns, echo=FALSE}
 my_kable(colnames(dataset))
 ```
-
-We have additional columns. Let's look at them.
-
-There are $`r n_distinct(dataset["areaCode"])`$ unique value for **areaCode**, $`r n_distinct(dataset["areaName"])`$ unique value for **areaName**, and $`r n_distinct(dataset["areaType"])`$ unique value for **areaType** as well.
-So, we do not need to look at them in the future because these columns are used for filtering that we have already done on the website.
 
 Just rename columns and we will move on to answer the questions.
 ```{r DatasetBristolNewNames, echo=FALSE}
@@ -96,6 +101,13 @@ dataset <- dataset[c("age", "date", "First", "Second", "Third")]
 
 kable(head(dataset))
 ```
+
+Question 1:
+```{r ref0, ref.label='q1', render=pander::pander, echo=FALSE}
+```
+
+I suggest looking at this graph from left to right and from down to up.
+Also, I put my dates on the graphs as the red lines.
 
 ```{r DatasetBristolVariables, include=FALSE}
 myFirst <- as.Date("2021-08-08", format="%Y-%m-%d")
@@ -122,6 +134,10 @@ ggplot(data = dataset,
 conclusion(dose, myAge, dataset)
 ```
 
+We can see that the active phases of the vaccination depends on the age group. The first group was people 90 years and older. The last one is the people 12-15 years old. It is not surprising, because, as I know, it was a government strategy.
+
+Look at the graph for the second dose.
+
 ```{r DatasetBristolSecond, echo=FALSE, fig.height = 10, fig.width = 12, fig.align = "center"}
 dose <- "Second"
 <<DatasetBristolAgePlot>>
@@ -129,6 +145,10 @@ dose <- "Second"
 ```{r DatasetBristolSecondConclusion, echo=FALSE, render=pander::pander}
 conclusion(dose, myAge, dataset)
 ```
+
+The second dose is 2 months after the first. And we can see the waves too.
+
+Look at the graph for the third dose.
 
 ```{r DatasetBristolThird, echo=FALSE, fig.height = 10, fig.width = 12, fig.align = "center"}
 dose <- "Third"
@@ -139,8 +159,13 @@ dose <- "Third"
 conclusion(dose, myAge, dataset)
 ```
 
-**Students**
+So, my date of the vaccination was not in the active phase.
+And I can’t imagine how many people were in the vaccination centre at the end of December 2021.
+
+Overall, I got my jabs in the not active phases of the vaccination, but I got the third one with a lot of people. And the count of jabs depends on dates. Keep this fact in mind.
+
 ```{r DatasetBristolStudentLongDataset, include=FALSE}
+# students dataset
 dataset_student_long <- melt(filter(dataset, age=="18_24"), id.vars = c("date")
                        , measure.vars = c("First", "Second", "Third")
                        , variable.name = "Dose"
@@ -148,7 +173,17 @@ dataset_student_long <- melt(filter(dataset, age=="18_24"), id.vars = c("date")
                     )
 ```
 
-```{r DatasetBristolStudentPlot, echo=FALSE}
+Question 0:
+```{r ref0, ref.label='q0', render=pander::pander, echo=FALSE}
+```
+
+There are two large universities in Bristol. I guess that the vaccination waves also depend on the academic year events.
+
+I will be use term-dates of UWE academic years:
+[2020-2021](https://www.uwe.ac.uk/study/term-dates/2020-21-term-dates), [2021-2022](https://www.uwe.ac.uk/study/term-dates/2021-22-term-dates), 
+[2022-2023](https://www.uwe.ac.uk/study/term-dates/2022-23-term-dates).
+
+```{r DatasetBristolStudentPlot, echo=FALSE, fig.height = 7, fig.width = 12, fig.align = "center"}
 ggplot(data = dataset_student_long,
        aes(x=date, y=Count)) +
     geom_rect(aes(xmin = as.Date("2020-10-19"),
@@ -168,11 +203,10 @@ ggplot(data = dataset_student_long,
   theme(axis.text.x = element_text(angle=90, hjust = 1)) +
   scale_x_date(date_breaks = "months" , date_labels = "%b-%y") +
   #scale_fill_brewer(palette = 'Dark2', name = 'Year') +
-  scale_fill_hue(c=45, l=80)
+  scale_fill_hue(c=45, l=80) +
+  guides(colour=guide_legend(title="Terms")) 
 ```
 
-<https://www.uwe.ac.uk/study/term-dates/2020-21-term-dates>
-
-<https://www.uwe.ac.uk/study/term-dates/2021-22-term-dates>
-
-<https://www.uwe.ac.uk/study/term-dates/2022-23-term-dates>
+The result is interesting but requires research.
+As I can see, the active phase of the vaccination for the age group 18-24 was during the Summer term. But why?
+It may be because students decided to prepare themselves for the new academic year. It may be because of the government or NHS suggestions. It is an open question.
