@@ -26,7 +26,7 @@ So, I am interested in data about the UK, England, South West, and Bristol.
 
 $\text{\underline{Question 0:}}$
 ```{r q0, render=pander::pander, echo=FALSE}
-"Are there dependencies between academic year events and vaccination waves? Does the vaccination depend on holidays?"
+"Are there dependencies between academic year events and vaccination waves?"
 ```
 
 I was vaccinated by the first, the second, and booster doses on 8 August 2021, 3 October 2021, 8 January 2022, respectively.
