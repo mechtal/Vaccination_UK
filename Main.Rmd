@@ -14,10 +14,10 @@ header-includes:
 classoption: landscape
 ---
 \newpage
-```{r child = 'Datasets.Rmd'}
+```{r child = 'Questions.Rmd'}
 ```
 \newpage
-```{r child = 'Questions.Rmd'}
+```{r child = 'Datasets.Rmd'}
 ```
 \newpage
 ```{r child = 'DatasetSouthWest.Rmd'}
