@@ -1,14 +1,18 @@
 ---
+site: bookdown::bookdown_site
 output:
   bookdown::pdf_document2:
     fig_caption: yes
+    toc: yes
     latex_engine: xelatex
 header-includes:
    - \usepackage{floatrow}
    - \floatsetup[figure]{capposition=top}
 classoption: landscape
 ---
-# Step 3 Look at the datasets
+# Exploring datasets
+
+## South West {#DatasetSouthWest}
 
 ```{r DatasetSouthWestPaths, include=FALSE}
 path = "/Users/travel_mechtal/Documents/UWE/Portfolio/"
@@ -16,63 +20,54 @@ path = "/Users/travel_mechtal/Documents/UWE/Portfolio/"
 
 ```{r DatasetSouthWestLibraries, include=FALSE}
 #---------------------------------------
-# knitr -- create pretty tables for a presentation
+# Knitting to pdf
 #---------------------------------------
 if(!require(knitr)){install.packages("knitr")}
 library(knitr)
 #---------------------------------------
-# kableExtra -- create pretty tables for a presentation
-#---------------------------------------
 if(!require(kableExtra)){install.packages("kableExtra")}
 library(kableExtra)
-#---------------------------------------
-# tidyverse -- work with objects using %>%, for example
-#---------------------------------------
-if(!require(tidyverse)){install.packages("tidyverse")}
-library(tidyverse)
-#---------------------------------------
-# reshape2 -- use melt
-#---------------------------------------
-if(!require(reshape2)){install.packages("reshape2")}
-library(reshape2)
-#---------------------------------------
-# ggplot2 -- plot
-#---------------------------------------
-if(!require(ggplot2)){install.packages("ggplot2")}
-library(ggplot2)
-#---------------------------------------
-# lubridate -- work with dates
-#---------------------------------------
-if(!require(lubridate)){install.packages("lubridate")}
-library(lubridate)
-#---------------------------------------
-# tinytex -- knit to pdf
 #---------------------------------------
 if(!require(tinytex)){install.packages("tinytex")}
 library(tinytex)
 #---------------------------------------
-# pander -- beautiful string from chunk
-#---------------------------------------
 if(!require(pander)){install.packages("pander")}
-library(pander)
+library(pander) #beautiful string from chunk
 #---------------------------------------
-# psych -- describing data
+# Describing data
 #---------------------------------------
 if(!require(psych)){install.packages("psych")}
 library(psych)
+#---------------------------------------
+# Plotting
+#---------------------------------------
+if(!require(ggplot2)){install.packages("ggplot2")}
+library(ggplot2)
+#---------------------------------------
+# Working with objects
+#---------------------------------------
+if(!require(tidyverse)){install.packages("tidyverse")}
+library(tidyverse) #work with objects using %>%, for example
+#---------------------------------------
+if(!require(reshape2)){install.packages("reshape2")}
+library(reshape2) #use melt, for example
+#---------------------------------------
+if(!require(lubridate)){install.packages("lubridate")}
+library(lubridate) #work with dates
 ```
 
 ```{r DatasetSouthWestRFunctions, include=FALSE}
-# for pretty tables
+#---------------------------------------
+# My function for a list view
+#---------------------------------------
 source("my_kable.R")
 ```
 
-## South West {#DatasetSouthWest}
-
-As we can see on the website, Region metrics are available for regions of England. I am interested in the South West and metrics that start with "New":
+Look at the dataset for South West.
 
 ```{r DatasetSouthWest, echo=FALSE}
-region_set <- read.csv(paste(path,"region_2022-01-27.csv",sep=""),
+# read the dataset
+region_set <- read.csv(paste0(path,"region_2022-01-27.csv"),
                          header = TRUE,
                          sep = ","
                          )
@@ -80,18 +75,17 @@ region_set <- read.csv(paste(path,"region_2022-01-27.csv",sep=""),
 # change date's format
 region_set$date <- as.Date(region_set$date,format = '%Y-%m-%d')
 
-
 my_kable(colnames(region_set))
 ```
 
 
 We have additional columns. Let's look at them.
 
-- For **areaCode** unique value is $`r unique(region_set[,"areaCode"])`$,
+- For **areaCode** unique value is `r unique(region_set[,"areaCode"])`,
 
-- for **areaName** unique value is $`r unique(region_set[,"areaName"])`$,
+- for **areaName** unique value is `r unique(region_set[,"areaName"])`,
 
-- for **areaType** unique value is $`r unique(region_set[,"areaType"])`$.
+- for **areaType** unique value is `r unique(region_set[,"areaType"])`.
 
 So, we do not need to look at them in the future because these columns are used for filtering that we have already done on the website.
 
@@ -108,21 +102,12 @@ region_set = rename(region_set,
          )
 ```
 
-- Add the column MonthYear
-
-```{r DatasetSouthWestNewColumnMonthYear, include=FALSE}
-# add columns
-MonthYear <- c(c(paste(1:12,2020,sep=".")), c(paste(1:12,2021,sep=".")), c(paste(1:12,2022,sep=".")))
-region_set$MonthYear <- factor(paste(month(region_set$date), year(region_set$date), sep=".")
-                               , levels = MonthYear)
-```
-
-- Create long table
+- Create a long table
 
 ```{r DatasetSouthWestLong, include=FALSE}
 # add the long verstion
 region_set_long <- melt(region_set
-                       , id.vars = c("date", "MonthYear")
+                       , id.vars = c("date")
                        , measure.vars = c("First"
                                           , "Second"
                                           , "Third"
@@ -135,9 +120,11 @@ region_set_long <- melt(region_set
 ```{r DatasetSouthWestLongHead, echo=FALSE}
 kable(head(region_set_long))
 ```
-Let's plot something.
 
-```{r DatasetSouthWestLongVariables, include=FALSE}
+Let's plot data.
+
+```{r DatasetSouthWestVariables, include=FALSE}
+# create variables for my dates
 myFirst <- as.Date("2021-08-08", format="%Y-%m-%d")
 mySecond <- as.Date("2021-10-03", format="%Y-%m-%d")
 myThird <- as.Date("2022-01-08", format="%Y-%m-%d")
@@ -147,12 +134,14 @@ myThird <- as.Date("2022-01-08", format="%Y-%m-%d")
 region_set_long_period <- filter(region_set_long, date >= as.Date("2021-07-01", format = "%Y-%m-%d"))
 ```
 
-\newpage
-### Question 0
+As I say in the part \@ref(Questions), I have a question:
 ```{r ref0, ref.label='q0', render=pander::pander, echo=FALSE}
 ```
 
-```{r DatasetSouthWestAllDosesPlot, echo=FALSE, fig.cap = "\\label{fig:AllDosesPlot} My caption"}
+Let's answer.
+The red lines are my vaccination dates.
+\newpage
+```{r DatasetSouthWestAllDosesPlot, echo=FALSE}
 ggplot(data = region_set_long_period
        , aes(x=date
              , y=Count
@@ -165,95 +154,49 @@ geom_vline(xintercept = myFirst, color = "red") +
 geom_vline(xintercept = mySecond, color = "red") +
 geom_vline(xintercept = myThird, color = "red") 
 ```
-
+\newpage
 The result is not beautiful because of the active growth of the third jabs count at the end of 2021. 
 
 Let's plot them separately.
 
-\newpage
-```{r DatasetSouthWestFirst, echo=FALSE}
-ggplot(data = filter(region_set_long_period, Dose == "First")
+```{r DatasetSouthWestFirst, include=FALSE}
+PlotDose <- "First"
+```
+
+```{r DatasetSouthWestPlot, echo=FALSE}
+ggplot(data = filter(region_set_long_period, Dose == PlotDose)
        , aes(x=date
              , y=Count
              )
        ) + 
 geom_point(colour = "blue") +
 theme(axis.text.x = element_text(angle=90, hjust = 1)) +
-geom_vline(xintercept = myFirst, color = "red") +
+geom_vline(xintercept = get(paste0("my", PlotDose)), color = "red") +
   labs(
     x = "Date"
-    , y = "Count of first doses"
+    , y = paste("Count of", PlotDose, "doses")
     , title = "Vaccination in South West"
-    , subtitle = "The first dose"
+    , subtitle = paste("The", PlotDose, "dose")
     , caption = "More information https://coronavirus.data.gov.uk/details/about-data"
   )
 ```
 
-It is so interesting why the graph is wavy. $`r filter(region_set, date==myFirst)["First"]`$ people got their first jabs with me.
+It is so interesting why the graph is wavy. `r filter(region_set, date==myFirst)["First"]` people got their first jabs with me.
 
-\newpage
 ```{r DatasetSouthWestSecond, echo=FALSE}
-ggplot(data = filter(region_set_long_period, Dose == "Second")
-       , aes(x=date
-             , y=Count
-             )
-       ) + 
-geom_point(colour="blue") +
-theme(axis.text.x = element_text(angle=90, hjust = 1)) +
-geom_vline(xintercept = mySecond, color = "red") +
-  labs(
-    x = "Date"
-    , y = "Count of second doses"
-    , title = "Vaccination in South West"
-    , subtitle = "The second dose"
-    , caption = "More information https://coronavirus.data.gov.uk/details/about-data"
-  )
+PlotDose <- "Second"
+<<DatasetSouthWestPlot>>
 ```
 
-$`r filter(region_set, date==mySecond)["Second"]`$ people got their second jabs with me.
+`r filter(region_set, date==mySecond)["Second"]` people got their second jabs with me.
 
-\newpage
 ```{r DatasetSouthWestThird, echo=FALSE}
-ggplot(data = filter(region_set_long_period, Dose == "Third")
-       , aes(x=date
-             , y=Count
-             )
-       ) + 
-geom_point(colour="blue") +
-theme(axis.text.x = element_text(angle=90, hjust = 1)) +
-geom_vline(xintercept = myThird, colour="red") +
-geom_vline(xintercept = as.Date("2021-09-17", format = "%Y-%m-%d"), color = "black", linetype="dotted") +
-  labs(
-    x = "Date"
-    , y = "Count of third doses"
-    , title = "Vaccination in South West"
-    , subtitle = "The third dose"
-    , caption = "More information https://coronavirus.data.gov.uk/details/about-data"
-  )
+PlotDose <- "Third"
+<<DatasetSouthWestPlot>>
 ```
 
-$`r filter(region_set, date==myThird)["Third"]`$ people got their third jabs with me.
+`r filter(region_set, date==myThird)["Third"]` people got their third jabs with me.
 We can see when the active phase of vaccination by the third dose started.
-
-Let's calculate the date. ("2021-09-17")
-
-```{r DatasetSouthWestLongSummarise, include=FALSE}
-region_set_long_agg <- region_set_long[,c("MonthYear", "Dose", "Count")] %>%
-group_by(MonthYear, Dose) %>%
-summarise(Count=sum(Count), na.rm = TRUE)
-```
-
-\newpage
-```{r DatasetSouthWestDosesWaves, fig.cap = "\\label{fig:DosesWaves} My caption", echo=FALSE}
-ggplot(data = region_set_long_agg, 
-aes(x=MonthYear, 
-y=Count, 
-fill = Dose
-)
-) +
-geom_col(position = "dodge") +
-theme(axis.text.x = element_text(angle=90, hjust = 1))
-```
 
 \newpage
 ### Zeroes
@@ -304,7 +247,8 @@ What can I say?
 
 - For the Third dose, half of the values are below $`r dataset_desc["Third", "median"]`$. That is not surprised. In the beginning, people needed to get two jabs.
 
-- If we look at "Q0.25", "Q0.75", "Q0.90", we find out that the Third dose's wave caught up with other doses' waves quickly. We already saw this fact on the plot \@ref(fig:DatasetSouthWestAllDosesPlot).
+- If we look at "Q0.25", "Q0.75", "Q0.90", we find out that the Third dose's wave caught up with other doses' waves quickly. We already saw this fact on the plots.
+
 ```{r DatasetSouthWestMeanMedianDataset, include=FALSE}
 a_mean <- region_set_long %>% 
   group_by(Dose) %>% 
