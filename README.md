@@ -14,3 +14,17 @@ Within the project, I use
 The result of the project is [Main.pdf](https://github.com/mechtal/Vaccination_UK/blob/main/Main.pdf).
 
 Contains public sector information licensed under the [Open Government Licence v3.0](https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/).
+
+## About Rmd-files
+
+[Datasets.Rmd](https://github.com/mechtal/Vaccination_UK/blob/main/Datasets.Rmd)
+This is about metrics.
+
+[DatasetSouthWest.Rmd](https://github.com/mechtal/Vaccination_UK/blob/main/DatasetSouthWest.Rmd)
+This is about the South West's dataset.
+
+[DatasetBristol.Rmd](https://github.com/mechtal/Vaccination_UK/blob/main/DatasetBristol.Rmd)
+This is about the Bristol's dataset.
+
+[DatasetEngland.Rmd](https://github.com/mechtal/Vaccination_UK/blob/main/DatasetEngland.Rmd)
+This is about the England's dataset.
