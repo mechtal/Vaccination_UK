@@ -55,9 +55,42 @@ source("my_kable.R")
 source("show_links.R")
 ```
 
-* Create a list of metrics for each dataset
+Look at the vaccination metrics from the website ["Coronavirus (COVID-19) in the UK"](https://coronavirus.data.gov.uk/metrics/category/Vaccinations).
 
-```{r DatasetsVariables, include=FALSE}
+```{r DatasetsVaccinationMetricsAll, echo=FALSE}
+# transform to dataframe json file
+VaccinationMetrics <- subset(as.data.frame(read_json(paste0(path, "metrics_Vaccinations.json"), simplifyVector = TRUE)), category == "Vaccinations")
+
+my_kable(VaccinationMetrics$metric_name)
+```
+
+I am going to use metrics 
+
+1. which names start with “New”, 
+2. by vaccination date, 
+3. and are not deprecated.
+
+Which [datasets](https://coronavirus.data.gov.uk/metrics/area_type) have these metrics?
+
+```{r DatasetsVaccinationMetrics, echo=FALSE}
+# create a set of necessary metrics
+VaccinationMetricsMy <- subset(VaccinationMetrics,
+  # conditions for subset
+  startsWith(metric_name, "New")
+  & endsWith(metric_name, "by vaccination date")
+  & is.na(deprecated)
+  )[,c("metric", "metric_name")] #columns
+
+# create sets of metrics for the first, the second, and the third doses
+first = VaccinationMetricsMy$metric[grepl("1st", VaccinationMetricsMy$metric_name, fixed = TRUE) | grepl("first", VaccinationMetricsMy$metric_name, fixed = TRUE)]
+
+second = VaccinationMetricsMy$metric[grepl("2nd", VaccinationMetricsMy$metric_name, fixed = TRUE) | grepl("second", VaccinationMetricsMy$metric_name, fixed = TRUE) 
+                     ]
+third = VaccinationMetricsMy$metric[grepl("third", VaccinationMetricsMy$metric_name, fixed = TRUE) | grepl("booster", VaccinationMetricsMy$metric_name, fixed = TRUE) 
+                     ]
+```
+
+```{r DatasetsAreaTypes, include=FALSE}
 # create dictionary: short area type's name = area type's name
 AreaTypesDict <- hash("ltla"="Lower Tier Local Authority (LTLA)"
                       ,"msoa"="Middle-layer Super Output Area (MSOA)"
@@ -68,99 +101,63 @@ AreaTypesDict <- hash("ltla"="Lower Tier Local Authority (LTLA)"
                       ,"region"="Region"
                       ,"utla"="Upper Tier Local Authority (UTLA)"
                       )
-# create vectors that are named as keys from AreaTypesDict and contain the dataset's metrics
+
 for(AreaType in keys(AreaTypesDict)){
   # AreaType metrics' file path
-  full_path = paste(path, "metrics_", AreaType, ".json", sep="")
+  full_path <- paste0(path, AreaType, "_new_vaccination")
   # create vector with metrics and name it as AreaType's value
-  assign(AreaType, 
-           subset(
-           # transform to dataframe json file
-           as.data.frame(read_json(full_path, simplifyVector = TRUE)),
-           # conditions for subset
-           category == "Vaccinations" & startsWith(metric_name, "New"))[,c("metric_name")]
-         )
+  assign(AreaType, scan(full_path, character(), quote = ""))
 }
 ```
-
-* Look at the metrics
-```{r DatasetsAreaTypeExample1, include=FALSE}
-AreaTypeExample <- "ltla"
-```
-
-```{r DatasetsAreaTypeExample, echo=FALSE}
-my_kable(get(AreaTypeExample), AreaTypesDict[[AreaTypeExample]])
-```
-
-```{r DatasetsAreaTypeExample2, echo=FALSE}
-AreaTypeExample <- "nation"
-<<DatasetsAreaTypeExample>>
-```
-
-So, as we can see, **some metrics are common**.
-I suggest finding out which metrics are the same for all datasets.
-
-* Add new metrics in a common list
-
-```{r DatasetsNewMetricsVariables, include=FALSE}
-Metrics = c()
-
-for(AreaType in keys(AreaTypesDict)) {
-  # combine two vectors and keep it as Metrics
-  Metrics = c(Metrics,get(AreaType))
-}
-UniqMetrics = unique(Metrics)
-
-first = UniqMetrics[grepl("1st", UniqMetrics, fixed = TRUE) 
-                    | grepl("first", UniqMetrics, fixed = TRUE)
-                    ]
-second = UniqMetrics[grepl("2nd", UniqMetrics, fixed = TRUE) 
-                     | grepl("second", UniqMetrics, fixed = TRUE) 
-                     ]
-third = UniqMetrics[grepl("third", UniqMetrics, fixed = TRUE) 
-                     | grepl("booster", UniqMetrics, fixed = TRUE) 
-                     ]
-```
-
-* Build zero-matrix, which dimension is the count of metrics x the count of area types
 
 ```{r DatasetsMatrixM, include=FALSE}
-M = matrix(0, length(UniqMetrics), length(keys(AreaTypesDict)))
-rownames(M) = UniqMetrics
+# create matrix to show which metrics belong to the datasets
+M = matrix(0, length(VaccinationMetrics$metric), length(keys(AreaTypesDict)))
+rownames(M) = VaccinationMetrics$metric
 colnames(M) = keys(AreaTypesDict)
-```
-
-* Show links
-
-```{r DatasetsMatrixMLinks, include=FALSE}
+# show links
 for(AreaType in keys(AreaTypesDict)){
 M = show_links(M, AreaType)
 }
 ```
 
-* Look at the result
-
 ```{r DatasetsMatrixMView, echo=FALSE}
+# view the table with highlighted necessary metrics
 M %>%
-  kable(booktabs = TRUE) %>%
+  kable(caption = "Vaccination metrics with highlight") %>%
   kable_styling(latex_options = "HOLD_position") %>%
-  column_spec(1, width = "20em") %>%
-  row_spec(which(UniqMetrics %in% first), color = "#104e8b", background = "#d3d3d3") %>%
-  row_spec(which(UniqMetrics %in% second), color = "red", background = "#d3d3d3") %>%
-  row_spec(which(UniqMetrics %in% third), color = "black", background = "#d3d3d3")
+  column_spec(1, width = "30em") %>%
+  row_spec(which(VaccinationMetrics$metric %in% first), color = "#104e8b", background = "#d3d3d3") %>%
+  row_spec(which(VaccinationMetrics$metric %in% second), color = "red", background = "#d3d3d3") %>%
+  row_spec(which(VaccinationMetrics$metric %in% third), color = "black", background = "#d3d3d3")
 ```
 
-First of all, I am interested in data about the **first jab**.
-**So, I need to look at the datasets:**
+So, I need to look at the datasets:
 
 ```{r DatasetsFirst, echo=FALSE}
+# choose the datasets which contain necessary metrics
 FirstDataset <- c()
 
 for(AreaType in keys(AreaTypesDict)){
   for(row in first) {
-    if(M[row,AreaType] == 1){FirstDataset=append(FirstDataset,AreaTypesDict[[AreaType]])}
+    if(M[row,AreaType] ==1)
+      {FirstDataset=append(FirstDataset,AreaTypesDict[[AreaType]])}
   }
 }
 
 my_kable(unique(FirstDataset))
 ```
+
+The dataset "Overview" presents the UK.
+Which metrics do we have for this dataset?
+```{r DatasetsUK, echo=FALSE}
+my_kable(overview)
+```
+
+So, we do not have data by vaccination date for the UK. I am going to use metrics from the Table \@ref(tab:DatasetsMatrixMView) for
+
+1. Bristol (Lower Tier Local Authority (LTLA)),
+2. South West (Region)
+3. and England (Nation).
+
+That is enough for answering.
