@@ -10,7 +10,7 @@ header-includes:
    - \floatsetup[figure]{capposition=top}
 classoption: landscape
 ---
-# Modeling
+# Modeling (Question 3)
 
 So, I am curious. Can I predict vaccination data?
 
@@ -218,7 +218,7 @@ As we can see, the column "First" has a strong relationship with
 At the same time, the column "Second" doesn't have strong relationships; but we can use the same columns.
 
 \newpage
-#### Question 2
+### Question 2
 As you remember, I have a question.
 ```{r ModelSouthWestRef2, ref.label='q2', render=pander::pander, echo=FALSE}
 ```
