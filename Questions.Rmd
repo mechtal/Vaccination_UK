@@ -45,7 +45,7 @@ $\text{\underline{Question 2:}}$
 
 $\text{\underline{Question 3:}}$
 ```{r q3, render=pander::pander, echo=FALSE}
-"Is there something illogical in data?"
+"Can I predict vaccination data?"
 ```
 
 Overall, I need to find datasets to answer my questions.
