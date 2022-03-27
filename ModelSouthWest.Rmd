@@ -10,7 +10,7 @@ header-includes:
    - \floatsetup[figure]{capposition=top}
 classoption: landscape
 ---
-# Step 4 Machine learning
+# Modeling
 
 ## South West
 
@@ -23,7 +23,6 @@ library(tidyverse)
 library(reticulate)
 use_python("/Users/travel_mechtal/opt/anaconda3/bin/python")
 use_condaenv("base", required = TRUE)
-
 # if I need a new module
 #py_install("ModuleName")
 # I already installed: pandas, networkx, typing_extensions, joblib, seaborn, scikit-learn
@@ -51,31 +50,29 @@ from sklearn.ensemble import RandomForestRegressor
 
 ```{r ModelSouthWestLibraries, include=FALSE}
 #---------------------------------------
-# ggplot2 -- plot
+# Plotting
 #---------------------------------------
 if(!require(ggplot2)){install.packages("ggplot2")}
 library(ggplot2)
 #---------------------------------------
-# reshape2 -- use melt
+# Working with objects
 #---------------------------------------
 if(!require(reshape2)){install.packages("reshape2")}
 library(reshape2)
 #---------------------------------------
-# ggplot2 -- plot
-#---------------------------------------
-if(!require(ggplot2)){install.packages("ggplot2")}
-library(ggplot2)
-#---------------------------------------
-# knitr, kableExtra -- describing data
+# Knitting to pdf
 #---------------------------------------
 if(!require(knitr)){install.packages("knitr")}
 library(knitr)
+#---------------------------------------
 if(!require(kableExtra)){install.packages("kableExtra")}
 library(kableExtra)
 ```
 
 ```{r ModelSouthWestRFunctions, include=FALSE}
-# for pretty tables
+#---------------------------------------
+# My function for a list view
+#---------------------------------------
 source("my_kable.R")
 ```
 
@@ -108,7 +105,7 @@ plt.figure(figsize=(20,12))
 sns.heatmap(data=
             dataset.sort_index())
 ```
-As we discuss earlier \@ref(fig:DosesWaves), there are waves. So, the count of jabs depends on dates.
+As we discuss earlier \@ref(DatasetSouthWest), there are waves. So, the count of jabs depends on dates.
 
 Let's get features:
 1) Year
@@ -117,6 +114,7 @@ Let's get features:
 etc.
 
 ```{python ModelSouthWestDatasetNewColumns, include=FALSE}
+# add new date features
 dataset['Year'] = dataset.index.year
 dataset['Month'] = dataset.index.month
 dataset['Day'] = dataset.index.day
@@ -187,7 +185,7 @@ What do we need to remember? Correlation does not imply causation. So, the colum
 
 ```{r ModelSouthWestCorrelationsPlot, echo=FALSE, fig.align = "center"}
 melted_cormat <- melt(cor(py$dataset))
-ggplot(data = filter(melted_cormat, Var1 %in% c("First", "Second")), aes(x=Var1, y=Var2, fill=value)) + 
+ggplot(data = filter(melted_cormat, Var1 %in% c("First", "Second", "Third")), aes(x=Var1, y=Var2, fill=value)) + 
   labs(x ="Dose", y = "Date features") +
   geom_tile() +
    scale_fill_gradient2(low = "blue", high = "red", mid = "white", 
@@ -200,7 +198,7 @@ ggplot(data = filter(melted_cormat, Var1 %in% c("First", "Second")), aes(x=Var1,
 
 In the table below, we can see the numeric values.
 ```{r ModelSouthWestCorrelations, echo=FALSE, fig.align = "center"}
-kable(filter(melted_cormat, Var1 %in% c("First", "Second"), Var2 %in% c("Month", "DayOfYear", "Quarter")), col.names=NULL)
+kable(filter(melted_cormat, Var1 %in% c("First", "Second", "Third"), Var2 %in% c("Month", "DayOfYear", "Quarter")), col.names=NULL)
 ```
 
 As we can see, the column "First" has a strong relationship with 
@@ -210,34 +208,6 @@ As we can see, the column "First" has a strong relationship with
 - "DayOfYear",
 
 - "Month". 
-
-
-```{r ModelSouthWestScatterPlot1, echo=FALSE}
-ggplot(data = py$dataset, 
-        aes(x=First, 
-        y=Quarter)
-) +
-  geom_point() +
-geom_smooth(method="lm", formula='y~x')
-```
-
-```{r ModelSouthWestScatterPlot2, echo=FALSE}
-ggplot(data = py$dataset, 
-        aes(x=First, 
-        y=DayOfYear)
-) +
-  geom_point() +
-geom_smooth(method="lm", formula='y~x')
-```
-
-```{r ModelSouthWestScatterPlot3, echo=FALSE}
-ggplot(data = py$dataset, 
-        aes(x=First, 
-        y=Month)
-) +
-  geom_point() +
-geom_smooth(method="lm", formula='y~x')
-```
 
 At the same time, the column "Second" doesn't have strong relationships; but we can use the same columns.
 
@@ -250,13 +220,16 @@ It may be helpful to choose the right features.
 
 Let's answer.
 ```{r ModelSouthWestWeekdaysPlot, echo=FALSE, fig.align = "center"}
+# create a table with mean values by weekday
 dataset_weekdays <- 
   py$dataset %>%
   group_by(Weekday)%>%
   summarise(across(c("First", "Second", "Third"), ~ mean(.x, na.rm = TRUE)))
 
+# set the right order
 dataset_weekdays$Weekday <- factor(dataset_weekdays$Weekday, labels = c('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'))
 
+# create a long table
 dataset_weekdays_long <-
   melt(dataset_weekdays, id.vars = c("Weekday")
                        , measure.vars = c("First", "Second", "Third")
@@ -264,6 +237,7 @@ dataset_weekdays_long <-
                        , value.name = "Count"
                     )
 
+# plot
 ggplot(data = dataset_weekdays_long, 
        aes(x=Weekday, 
            y=Count,
@@ -335,29 +309,10 @@ print("DecisionTree: ", 1 - mae_dt/dataset[y_column].mean())
 print("RandomForest: ", 1 - mae_rf/dataset[y_column].mean())
 ```
 
-Look at the tree
-
-```{python ModelSouthWestTreeDt, echo=FALSE, fig.align = "center"}
-plt.figure(figsize=(60, 40))
-# feature_columns is defined above
-tree.plot_tree(model_dt, max_depth=2, feature_names=feature_columns)
-```
-
-```{python ModelSouthWestTreeRf, echo=FALSE, fig.align = "center"}
-plt.figure(figsize=(60,40))
-# feature_columns is defined above
-tree.plot_tree(model_rf.estimators_[0], max_depth=2, feature_names=feature_columns)
-```
-
-What can we see?
-
-
-
 Finally, look at the result.
 
 ```{python ModelSouthWestPlotAll, echo=FALSE, fig.align = "center"}
 plt.figure(figsize=(25,15))
-sns.set_style("darkgrid")
 plt.title('{} ({})'.format("Comparing", y_column))
 # plot DecisionTree
 sns.lineplot(data=predictions_dt, label='{} MAE:{}'.format("DecisionTree", round(mae_dt,0)))
@@ -391,8 +346,6 @@ feature_columns = ["Weekday", "Year", "DayOfYear"]
 
 ```{python ModelSouthWestTrainMy, echo=FALSE}
 <<ModelSouthWestTrainAll>>
-#<<tree_dt>>
-#<<tree_rf>>
 <<ModelSouthWestPlotAll>>
 ```
 
@@ -406,74 +359,14 @@ feature_columns = ["Month", "DayOfYear", "Quarter"]
 
 ```{python ModelSouthWestTrainCorrelations, echo=FALSE}
 <<ModelSouthWestTrainAll>>
-#<<tree_dt>>
-#<<tree_rf>>
 <<ModelSouthWestPlotAll>>
 ```
 
 Not so good.
 
-**Repeat for the Second**
-```{python ModelSouthWestSecond, include=FALSE}
-y_column = "Second"
-```
-```{python ModelSouthWestSecondTrainAll, echo=FALSE}
-<<ModelSouthWestAllColumns>>
-<<ModelSouthWestTrainAll>>
-#<<tree_dt>>
-#<<tree_rf>>
-<<ModelSouthWestPlotAll>>
-```
-
-\newpage
-```{python ModelSouthWestSecondTrainMy, echo=FALSE}
-<<ModelSouthWestMyColumns>>
-<<ModelSouthWestTrainAll>>
-#<<tree_dt>>
-#<<tree_rf>>
-<<ModelSouthWestPlotAll>>
-```
-
-\newpage
-```{python ModelSouthWestSecondTrainCorrelations, echo=FALSE}
-<<ModelSouthWestCorrelationsColumns>>
-<<ModelSouthWestTrainAll>>
-#<<tree_dt>>
-#<<tree_rf>>
-<<ModelSouthWestPlotAll>>
-```
-
-**Repeat for Third**
-```{python ModelSouthWestThird, include=FALSE}
-y_column = "Third"
-```
-```{python ModelSouthWestThirdTrainAll, echo=FALSE}
-<<ModelSouthWestAllColumns>>
-<<ModelSouthWestTrainAll>>
-#<<tree_dt>>
-#<<tree_rf>>
-<<ModelSouthWestPlotAll>>
-```
-
-\newpage
-```{python ModelSouthWestThirdTrainMy, echo=FALSE}
-<<ModelSouthWestMyColumns>>
-<<ModelSouthWestTrainAll>>
-#<<tree_dt>>
-#<<tree_rf>>
-<<ModelSouthWestPlotAll>>
-```
-
-\newpage
-```{python, echo=FALSE}
-<<ModelSouthWestCorrelationsColumns>>
-<<ModelSouthWestTrainAll>>
-#<<tree_dt>>
-#<<tree_rf>>
-<<ModelSouthWestPlotAll>>
-```
-
 A combination of the following features give us the best result: Weekday, Year, DayOfYear.
+
+We can also look at the models for the Second and Third doses. But now I suggest moving on. Maybe in the future, I will find more fitting models.
 
 
 
