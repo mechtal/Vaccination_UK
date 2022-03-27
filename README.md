@@ -15,7 +15,7 @@ The result of the project is [Main.pdf](https://github.com/mechtal/Vaccination_U
 
 Contains public sector information licensed under the [Open Government Licence v3.0](https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/).
 
-## About Rmd-files
+## Rmd-files
 
 [Main.Rmd](https://github.com/mechtal/Vaccination_UK/blob/main/Main.Rmd) is the main file to combine the files below.
 
