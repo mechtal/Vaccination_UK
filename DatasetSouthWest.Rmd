@@ -91,7 +91,7 @@ So, we do not need to look at them in the future because these columns are used 
 
 Let's prepare data for the plotting.
 
-- Rename columns and columns
+- Rename columns
 
 ```{r DatasetSouthWestNewNames, include=FALSE}
 # rename columns
@@ -245,7 +245,7 @@ What can I say?
 
 - Mean and median have a visible difference. So, there are large extreme values.
 
-- For the Third dose, half of the values are below $`r dataset_desc["Third", "median"]`$. That is not surprised. In the beginning, people needed to get two jabs.
+- For the Third dose, half of the values are below $`r dataset_desc["Third", "median"]`$. That is not surprising. In the beginning, people needed to get two jabs.
 
 - If we look at "Q0.25", "Q0.75", "Q0.90", we find out that the Third dose's wave caught up with other doses' waves quickly. We already saw this fact on the plots.
 
