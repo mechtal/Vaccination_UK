@@ -12,10 +12,11 @@ classoption: landscape
 ---
 # Modeling
 
+So, I am curious. Can I predict vaccination data?
+
 ## South West
 
 ### Look at and Modify the dataset
-So, I am curious. Can I predict vaccination data?
 
 ```{r ModelSouthWestLibrariesForPython, include=FALSE}
 # Setting for using python
@@ -155,10 +156,11 @@ check the X summary.
 6. Choose the library
 
 7. Build and use the model
-What type of model will it be?
-Capture patterns from provided data.
-Predict
-Evaluate = Determine how accurate the model’s predictions are
+
+* What type of model will it be?
+* Capture patterns from provided data.
+* Predict
+* Evaluate = Determine how accurate the model’s predictions are
 
 Let's look at the dataset carefully.
 \newpage
@@ -304,9 +306,6 @@ train_X, val_X, train_y, val_y = prepare_sets(dataset, feature_columns, y_column
 mae_dt, predictions_dt, model_dt = train_model(train_X, val_X, train_y, val_y, "DecisionTree", n_estimators=None)
 # RandomForest
 mae_rf, predictions_rf, model_rf = train_model(train_X, val_X, train_y, val_y, "RandomForest", n_estimators=500)
-
-print("DecisionTree: ", 1 - mae_dt/dataset[y_column].mean())
-print("RandomForest: ", 1 - mae_rf/dataset[y_column].mean())
 ```
 
 Finally, look at the result.
