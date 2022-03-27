@@ -17,6 +17,8 @@ Contains public sector information licensed under the [Open Government Licence v
 
 ## About Rmd-files
 
+[Main.Rmd](https://github.com/mechtal/Vaccination_UK/blob/main/Main.Rmd) is the main file to combine the files below.
+
 [Datasets.Rmd](https://github.com/mechtal/Vaccination_UK/blob/main/Datasets.Rmd) is about metrics.
 
 [DatasetSouthWest.Rmd](https://github.com/mechtal/Vaccination_UK/blob/main/DatasetSouthWest.Rmd) and [ModelSouthWest.Rmd](https://github.com/mechtal/Vaccination_UK/blob/main/ModelSouthWest.Rmd) are about the South West's dataset.
