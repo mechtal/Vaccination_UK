@@ -17,38 +17,36 @@ Hello. My name is Elena, and I am a Data Scientist.
 
 When I came to Bristol in May 2021, I decided to be vaccinated because, in my opinion, this is a safer way to live my normal life. So, I started my long research about Covid vaccination. And now I am ready to show you interesting facts.
 
+## Questions
+
 I live in Bristol. What do I know about Bristol? 
 
 * This city is a part of the UK, England, and South West. 
 * There are two universities.
-
-So, I am interested in data about the UK, England, South West, and Bristol. 
 
 $\text{\underline{Question 0:}}$
 ```{r q0, render=pander::pander, echo=FALSE}
 "Are there dependencies between academic year events and vaccination waves?"
 ```
 
-I was vaccinated by the first, the second, and booster doses on 8 August 2021, 3 October 2021, 8 January 2022, respectively.
-
-$\text{\underline{Question 1:}}$
+I was vaccinated by the first, the second, and booster doses on 8 August 2021, 3 October 2021, 8 January 2022, respectively. $\text{\underline{Question 1:}}$
 ```{r q1, render=pander::pander, echo=FALSE}
 "How many people got their jabs with me?"
 ```
 
 I got the first and the second jabs on Sunday. There were fewer people in the vaccination centre. When I got the third jab on Saturday, there was a big queue. 
-
 $\text{\underline{Question 2:}}$
 ```{r q2, render=pander::pander, echo=FALSE}
 "When do people prefer to get a jab: weekdays or weekends/Saturdays or Sundays?"
 ```
 
-$\text{\underline{Question 3:}}$
+Finally, $\text{\underline{Question 3:}}$
 ```{r q3, render=pander::pander, echo=FALSE}
 "Can I predict vaccination data?"
 ```
 
-Overall, I need to find datasets to answer my questions.
+## Overall
+I need to find datasets to answer my questions.
 
 * Data is about the UK, England, South West, and Bristol.
 * Data is about new people who got the jabs by dates.

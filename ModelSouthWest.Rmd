@@ -16,7 +16,7 @@ So, I am curious. Can I predict vaccination data?
 
 ## South West
 
-### Look at and Modify the dataset
+### Looking at and Modifying the dataset
 
 ```{r ModelSouthWestLibrariesForPython, include=FALSE}
 # Setting for using python
@@ -106,6 +106,8 @@ plt.figure(figsize=(20,12))
 sns.heatmap(data=
             dataset.sort_index())
 ```
+### Getting features
+
 As we discuss earlier \@ref(DatasetSouthWest), there are waves. So, the count of jabs depends on dates.
 
 Let's get features:
@@ -128,6 +130,8 @@ dataset['IsMonthEnd'] = dataset.index.is_month_end
 
 ```{r ModelSouthWestDatasetHeadWithFeatures, ref.label=c('ModelSouthWestDatasetHead'), echo=FALSE}
 ```
+
+### Choosing a model
 
 First of all, I am going to use Regression Machine Learning models: 
 
@@ -165,7 +169,7 @@ check the X summary.
 Let's look at the dataset carefully.
 \newpage
 
-### Explore the dataset
+### Exploring the dataset
 
 In the previous chapter \@ref(DatasetSouthWest), we already looked at the South West's data. Do we need to know something else? Yes.
 
@@ -214,7 +218,7 @@ As we can see, the column "First" has a strong relationship with
 At the same time, the column "Second" doesn't have strong relationships; but we can use the same columns.
 
 \newpage
-#### Weekdays
+#### Question 2
 As you remember, I have a question.
 ```{r ModelSouthWestRef2, ref.label='q2', render=pander::pander, echo=FALSE}
 ```
@@ -273,7 +277,7 @@ There are no missing dates.
 So, we have finished the dataset exploring. The next steps are about the models.
 
 \newpage
-### Split sets, train a Machine Learning Model and Evaluate performance
+### Splitting sets, training a Machine Learning Model and Evaluating performance
 ```{r ModelSouthWestPythonFunctions, include=FALSE}
 # function for preparing sets
 source_python('prepare_sets.py')

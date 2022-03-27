@@ -93,6 +93,7 @@ england$Diffdate <- england$Date - replace_na(lag(england$Date), min(england$Dat
 ```
 The difference between dates is `r unique(england["Diffdate"])`. So, we have full statistics by date.
 
+### Missing values
 Do we have missing values?
 ```{r DatasetEnglandNA, echo=FALSE}
 # count of missing values per column
@@ -108,6 +109,11 @@ Replace by zero.
 
 ```{r DatasetEnglandNAReplacing, include=FALSE}
 england$Third <- england$Third %>% replace_na(0)
+```
+
+### Question 1
+
+```{r DatasetEnglandRef1, ref.label='q1', render=pander::pander, echo=FALSE}
 ```
 
 ```{r DatasetEnglandVariables, include=FALSE}
@@ -138,11 +144,6 @@ myData <- filter(england_long, Dose=="First" & Date==myFirst |
 maxData <- england_long %>%
   group_by(Dose) %>%
   top_n(1, Count)
-```
-
-I have a question.
-
-```{r DatasetEnglandRef1, ref.label='q1', render=pander::pander, echo=FALSE}
 ```
 
 ```{r DatasetEnglandAllDosesPlot, echo=FALSE, fig.height = 8, fig.width = 12, fig.align = "center"}

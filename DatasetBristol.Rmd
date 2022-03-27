@@ -102,7 +102,7 @@ dataset <- dataset[c("age", "date", "First", "Second", "Third")]
 kable(head(dataset))
 ```
 
-Question 1:
+### Question 1
 ```{r ref0, ref.label='q1', render=pander::pander, echo=FALSE}
 ```
 
@@ -164,6 +164,10 @@ And I can’t imagine how many people were in the vaccination centre at the end 
 
 Overall, I got my jabs in the not active phases of the vaccination, but I got the third one with a lot of people. And the count of jabs depends on dates. Keep this fact in mind.
 
+### Question 0
+```{r ref0, ref.label='q0', render=pander::pander, echo=FALSE}
+```
+
 ```{r DatasetBristolStudentLongDataset, include=FALSE}
 # students dataset
 dataset_student_long <- melt(filter(dataset, age=="18_24"), id.vars = c("date")
@@ -171,10 +175,6 @@ dataset_student_long <- melt(filter(dataset, age=="18_24"), id.vars = c("date")
                        , variable.name = "Dose"
                        , value.name = "Count"
                     )
-```
-
-Question 0:
-```{r ref0, ref.label='q0', render=pander::pander, echo=FALSE}
 ```
 
 There are two large universities in Bristol. I guess that the vaccination waves also depend on the academic year events.
