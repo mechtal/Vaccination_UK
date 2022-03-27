@@ -10,61 +10,69 @@ classoption: landscape
 ---
 ## England {#ModelEngland}
 
+```{r ModelEnglandPaths, include=FALSE}
+path = "/Users/travel_mechtal/Documents/UWE/Portfolio/"
+```
+
 ```{r ModelEnglandLibraries, include=FALSE}
 #---------------------------------------
-# knitr -- create pretty tables for a presentation
+# Knitting to pdf
 #---------------------------------------
 if(!require(knitr)){install.packages("knitr")}
 library(knitr)
 #---------------------------------------
-# kableExtra -- create pretty tables for a presentation
-#---------------------------------------
 if(!require(kableExtra)){install.packages("kableExtra")}
 library(kableExtra)
 #---------------------------------------
-# dplyr -- rename
+# Working with objects
 #---------------------------------------
 if(!require(dplyr)){install.packages("dplyr")}
-library(dplyr)
-#---------------------------------------
-# tidyr -- replace_na
+library(dplyr) #rename
 #---------------------------------------
 if(!require(tidyr)){install.packages("tidyr")}
-library(tidyr)
+library(tidyr) #replace_na
 #---------------------------------------
-# forecast -- forcasting
+if(!require(glue)){install.packages("glue")}
+library(glue) #glue_collapse
+#---------------------------------------
+# Forcasting
 #---------------------------------------
 if(!require(forecast)){install.packages("forecast")}
 library(forecast)
 #---------------------------------------
-# ggplot2 -- plots
+# Plotting
 #---------------------------------------
 if(!require(ggplot2)){install.packages("ggplot2")}
 library(ggplot2)
 ```
 
 Look at the dataset.
+
 ```{r ModelEnglandDataset, echo=FALSE}
-england <- read.csv("/Users/travel_mechtal/Documents/UWE/Portfolio/nation_2022-03-10.csv", header = TRUE, sep = ",")
-
+# read the data
+england <- read.csv(paste0(path,"nation_2022-03-10.csv"), header = TRUE, sep = ",")
+# add new column Date
 england$Date <- as.Date(england$date, format = "%Y-%m-%d")
-
+# order the dataset
 england <- england[order(england$Date),]
-
+# rename columns
 england = rename(england, 
        First = newPeopleVaccinatedFirstDoseByVaccinationDate
        ,Second = newPeopleVaccinatedSecondDoseByVaccinationDate
        ,Third = newPeopleVaccinatedThirdInjectionByVaccinationDate
          )
-
+# choose necessary columns
 england <- england[c("Date", "First", "Second", "Third")]
-
+# replace NA-values for the column "Third"
 england$Third <- england$Third %>% replace_na(0)
-
+# add the new column All that equals a sum of doses counts
 england$All <- england$First + england$Second + england$Third
 
 kable(head(england))
 ```
+
+Look at the plot for the sum of doses counts.
+
 ```{r ModelEnglandAll, include=FALSE}
 FitColumn <- "All"
 ```
@@ -79,24 +87,20 @@ What can we say?
 
 There is a not stationary time series, as the series wanders up and down for long periods.
 
+I am going to use an ARIMA model.
+
 ```{r ModelEnglandTimeSeries, include=FALSE}
 englandFit <- ts(data=england[FitColumn], frequency = 1)
-autoplot(englandFit)
-```
-
-```{r ModelEnglandArima, include=FALSE}
 fit <- auto.arima(englandFit)
+pdq <- arimaorder(fit)
 ```
 
-```{r ModelEnglandArimaSummary, echo=FALSE}
-summary(fit)
-```
-ARIMA(5, 1, 3)
-ARIMA(p,d,q)
+ARIMA(`r glue_collapse(pdq, sep=", ")`)
 
-* p – is the order of Auto-regressive or linear model
-* q – is the order of Moving Average/ number of lagged values
-* d – difference value to make the time series stationary from non-stationary.
+* `r pdq[1]` – is the order of Auto-regressive or linear model
+* `r pdq[2]` – difference value to make the time series stationary from non-stationary.
+* `r pdq[3]` – is the order of Moving Average/ number of lagged values
+
 If the data is stationary, then d=0. So, I was right earlier.
 
 ```{r ModelEnglandTimeSeriesAcf, echo=FALSE}
@@ -111,26 +115,16 @@ So,
 * the autocorrelations decline slowly.
 * When a time series has both a trend and seasonality, the ACF plot displays a mixture of both effects. Notice how you can see the wavy correlations for the seasonal pattern and the slowly diminishing lags of a trend.
 
-```{r ModelEnglandTimeSeriesPacf, include=FALSE}
-pacf(englandFit)
-#The first difference is really important
-#The partial autocorrelation function is similar to the ACF except that it displays only the correlation between two observations that the shorter lags between those observations do not explain. 
-```
+Look at the residuals that tell us a story about the model performance.
 
-The residuals in ARIMA models tell a story about the performance of your model and should be taken into consideration when evaluating them. The functions checkresiduals, ACF and PACF make it easy to keep track of the information left behind in the residuals by your model. [(link)](https://towardsdatascience.com/time-series-analysis-with-auto-arima-in-r-2b220b20e8ab>)
-
-```{r ModelEnglandArimaCheckResiduals, echo=FALSE}
+```{r ModelEnglandArimaCheckResiduals, echo=FALSE, message=FALSE}
 checkresiduals(fit)
 ```
+
+The first plot shows us that the difference between the observations and the corresponding fitted values is not fine.
 
 ```{r ModelEnglandArimaForecast, echo=FALSE}
 autoplot(forecast(fit))
 ```
 
-```{r ModelEnglandArimaForecastLower, echo=FALSE}
-forecast(fit)$lower
-```
-
-```{r ModelEnglandArimaForecastUpper, echo=FALSE}
-forecast(fit)$upper[1,]
-```
+I am not impressed because there are negative values. But I am sure that this may be corrected by using not auto.arima. What do I need to think about? Is how to explain to the model that the second dose is two months after the First, and the Third one is three or six months after the Second. Maybe I can find the explanatory variable for that.
