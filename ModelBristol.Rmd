@@ -12,47 +12,48 @@ classoption: landscape
 ---
 ## Bristol
 
+```{r ModelBristolPaths, include=FALSE}
+path = "/Users/travel_mechtal/Documents/UWE/Portfolio/"
+```
+
 ```{r ModelBristolLibraries, include=FALSE}
 #---------------------------------------
-# ggplot2 -- plot
+# Plotting
 #---------------------------------------
 if(!require(ggplot2)){install.packages("ggplot2")}
 library(ggplot2)
 #---------------------------------------
-# dplyr -- rename
+# Working with objects
 #---------------------------------------
 if(!require(dplyr)){install.packages("dplyr")}
-library(dplyr)
+library(dplyr) #rename
 #---------------------------------------
-# knitr -- create pretty tables for a presentation
+# Knitting to pdf
 #---------------------------------------
 if(!require(knitr)){install.packages("knitr")}
 library(knitr)
 ```
 
-```{r ModelBristolPaths, include=FALSE}
-path = "/Users/travel_mechtal/Documents/UWE/Portfolio/"
-```
-
 ```{r ModelBristolDataset, include=FALSE}
-dataset <- read.csv(paste(path,"ltla_2022-02-10.csv",sep=""),
+# read the data
+dataset <- read.csv(paste0(path,"ltla_2022-03-25.csv"),
                          header = TRUE,
                          sep = ","
                          )
 
 # change date's format
 dataset$date <- as.Date(dataset$date,format = '%Y-%m-%d')
-
+# rename columns
 dataset = rename(dataset, 
        First = newPeopleVaccinatedFirstDoseByVaccinationDate
        ,Second = newPeopleVaccinatedSecondDoseByVaccinationDate
        ,Third = newPeopleVaccinatedThirdInjectionByVaccinationDate
          )
-
+# choose columns
 dataset <- dataset[c("age", "date", "First", "Second", "Third")]
 ```
 
-Look at the dataset.
+Add the column "Age" for the model using Ordinal Encoding and look at the dataset.
 
 ```{r ModelBristolDatasetHead, echo=FALSE}
 age_ord <- unique(dataset["age"])
@@ -60,16 +61,18 @@ dataset$Age <- which(age_ord == dataset$age)
 kable(head(dataset))
 ```
 
-Using the k-means clustering model, we find out that sometimes a lot of people in the same age group got their jabs together. And the group 18-24 is not an exception.
+I am going to use the k-means clustering model.
 
 ```{r ModelBristolFirst, include=FALSE}
 y_column = "First"
 ```
 
 ```{r ModelBristolKmeans, echo=FALSE}
+# k-means clustering model
 cls <- kmeans(x = data.matrix(dataset[,c("Age", y_column)]), centers = 5)
 dataset$cluster <- as.character(cls$cluster)
 
+# plot
 ggplot() +
   geom_point(data = dataset, 
              mapping = aes_string(x = "age", 
@@ -87,3 +90,5 @@ y_column = "Second"
 y_column = "Third"
 <<ModelBristolKmeans>>
 ```
+
+As we can see, sometimes a lot of people in the same age group got their jabs together. This fact may be useful for modeling.
