@@ -68,6 +68,11 @@ library(knitr)
 #---------------------------------------
 if(!require(kableExtra)){install.packages("kableExtra")}
 library(kableExtra)
+#---------------------------------------
+# Getting session info
+#---------------------------------------
+if(!require(sessioninfo)){install.packages("sessioninfo")}
+library(sessioninfo)
 ```
 
 ```{r ModelSouthWestRFunctions, include=FALSE}
@@ -75,6 +80,10 @@ library(kableExtra)
 # My function for a list view
 #---------------------------------------
 source("my_kable.R")
+```
+
+```{r ModelSouthWestSessionInfo, include=FALSE}
+session_info(to_file = "ModelSouthWestSessionInfo.log")
 ```
 
 ```{python ModelSouthWestDataset, include=FALSE}

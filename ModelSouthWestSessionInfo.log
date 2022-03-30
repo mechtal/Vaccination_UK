@@ -1,0 +1,100 @@
+- Session info ---------------------------------------------------------------
+ setting  value
+ version  R version 4.1.2 (2021-11-01)
+ os       macOS Big Sur 10.16
+ system   x86_64, darwin17.0
+ ui       X11
+ language (EN)
+ collate  en_GB.UTF-8
+ ctype    en_GB.UTF-8
+ tz       Europe/London
+ date     2022-03-30
+ pandoc   2.14.0.3 @ /Applications/RStudio.app/Contents/MacOS/pandoc/ (via rmarkdown)
+
+- Packages -------------------------------------------------------------------
+ package     * version date (UTC) lib source
+ assertthat    0.2.1   2019-03-21 [1] CRAN (R 4.1.0)
+ backports     1.4.0   2021-11-23 [1] CRAN (R 4.1.0)
+ bookdown      0.24.9  2022-02-09 [1] Github (rstudio/bookdown@7f92ffa)
+ broom         0.7.10  2021-10-31 [1] CRAN (R 4.1.0)
+ cellranger    1.1.0   2016-07-27 [1] CRAN (R 4.1.0)
+ cli           3.1.0   2021-10-27 [1] CRAN (R 4.1.0)
+ colorspace    2.0-2   2021-06-24 [1] CRAN (R 4.1.0)
+ crayon        1.4.2   2021-10-29 [1] CRAN (R 4.1.0)
+ DBI           1.1.1   2021-01-15 [1] CRAN (R 4.1.0)
+ dbplyr        2.1.1   2021-04-06 [1] CRAN (R 4.1.0)
+ digest        0.6.29  2021-12-01 [1] CRAN (R 4.1.0)
+ dplyr       * 1.0.7   2021-06-18 [1] CRAN (R 4.1.0)
+ ellipsis      0.3.2   2021-04-29 [1] CRAN (R 4.1.0)
+ evaluate      0.14    2019-05-28 [1] CRAN (R 4.1.0)
+ fansi         0.5.0   2021-05-25 [1] CRAN (R 4.1.0)
+ fastmap       1.1.0   2021-01-25 [1] CRAN (R 4.1.0)
+ forcats     * 0.5.1   2021-01-27 [1] CRAN (R 4.1.0)
+ fs            1.5.2   2021-12-08 [1] CRAN (R 4.1.0)
+ generics      0.1.1   2021-10-25 [1] CRAN (R 4.1.0)
+ ggplot2     * 3.3.5   2021-06-25 [1] CRAN (R 4.1.0)
+ glue          1.6.1   2022-01-22 [1] CRAN (R 4.1.2)
+ gtable        0.3.0   2019-03-25 [1] CRAN (R 4.1.0)
+ haven         2.4.3   2021-08-04 [1] CRAN (R 4.1.0)
+ hms           1.1.1   2021-09-26 [1] CRAN (R 4.1.0)
+ htmltools     0.5.2   2021-08-25 [1] CRAN (R 4.1.0)
+ httr          1.4.2   2020-07-20 [1] CRAN (R 4.1.0)
+ jsonlite      1.7.3   2022-01-17 [1] CRAN (R 4.1.2)
+ kableExtra  * 1.3.4   2021-02-20 [1] CRAN (R 4.1.0)
+ knitr       * 1.37    2021-12-16 [1] CRAN (R 4.1.0)
+ lattice       0.20-45 2021-09-22 [1] CRAN (R 4.1.2)
+ lifecycle     1.0.1   2021-09-24 [1] CRAN (R 4.1.0)
+ lubridate     1.8.0   2021-10-07 [1] CRAN (R 4.1.0)
+ magrittr      2.0.2   2022-01-26 [1] CRAN (R 4.1.2)
+ Matrix        1.3-4   2021-06-01 [1] CRAN (R 4.1.2)
+ modelr        0.1.8   2020-05-19 [1] CRAN (R 4.1.0)
+ munsell       0.5.0   2018-06-12 [1] CRAN (R 4.1.0)
+ pillar        1.6.4   2021-10-18 [1] CRAN (R 4.1.0)
+ pkgconfig     2.0.3   2019-09-22 [1] CRAN (R 4.1.0)
+ plyr          1.8.6   2020-03-03 [1] CRAN (R 4.1.0)
+ png           0.1-7   2013-12-03 [1] CRAN (R 4.1.0)
+ purrr       * 0.3.4   2020-04-17 [1] CRAN (R 4.1.0)
+ R6            2.5.1   2021-08-19 [1] CRAN (R 4.1.0)
+ Rcpp          1.0.7   2021-07-07 [1] CRAN (R 4.1.0)
+ readr       * 2.1.1   2021-11-30 [1] CRAN (R 4.1.0)
+ readxl        1.3.1   2019-03-13 [1] CRAN (R 4.1.0)
+ reprex        2.0.1   2021-08-05 [1] CRAN (R 4.1.0)
+ reshape2    * 1.4.4   2020-04-09 [1] CRAN (R 4.1.0)
+ reticulate  * 1.24    2022-01-26 [1] CRAN (R 4.1.2)
+ rlang         1.0.1   2022-02-03 [1] CRAN (R 4.1.2)
+ rmarkdown     2.11.16 2022-02-09 [1] Github (rstudio/rmarkdown@880923d)
+ rstudioapi    0.13    2020-11-12 [1] CRAN (R 4.1.0)
+ rvest         1.0.2   2021-10-16 [1] CRAN (R 4.1.0)
+ scales        1.1.1   2020-05-11 [1] CRAN (R 4.1.0)
+ sessioninfo * 1.2.2   2021-12-06 [1] CRAN (R 4.1.0)
+ stringi       1.7.6   2021-11-29 [1] CRAN (R 4.1.0)
+ stringr     * 1.4.0   2019-02-10 [1] CRAN (R 4.1.0)
+ svglite       2.0.0   2021-02-20 [1] CRAN (R 4.1.0)
+ systemfonts   1.0.2   2021-05-11 [1] CRAN (R 4.1.0)
+ tibble      * 3.1.6   2021-11-07 [1] CRAN (R 4.1.0)
+ tidyr       * 1.1.4   2021-09-27 [1] CRAN (R 4.1.0)
+ tidyselect    1.1.1   2021-04-30 [1] CRAN (R 4.1.0)
+ tidyverse   * 1.3.1   2021-04-15 [1] CRAN (R 4.1.0)
+ tzdb          0.2.0   2021-10-27 [1] CRAN (R 4.1.0)
+ utf8          1.2.2   2021-07-24 [1] CRAN (R 4.1.0)
+ vctrs         0.3.8   2021-04-29 [1] CRAN (R 4.1.0)
+ viridisLite   0.4.0   2021-04-13 [1] CRAN (R 4.1.0)
+ webshot       0.5.2   2019-11-22 [1] CRAN (R 4.1.0)
+ withr         2.4.3   2021-11-30 [1] CRAN (R 4.1.0)
+ xfun          0.29    2021-12-14 [1] CRAN (R 4.1.0)
+ xml2          1.3.3   2021-11-30 [1] CRAN (R 4.1.0)
+ yaml          2.2.2   2022-01-25 [1] CRAN (R 4.1.2)
+
+ [1] /Library/Frameworks/R.framework/Versions/4.1/Resources/library
+
+- Python configuration -------------------------------------------------------
+ python:         /Users/travel_mechtal/opt/anaconda3/bin/python
+ libpython:      /Users/travel_mechtal/opt/anaconda3/lib/libpython3.9.dylib
+ pythonhome:     /Users/travel_mechtal/opt/anaconda3:/Users/travel_mechtal/opt/anaconda3
+ version:        3.9.7 (default, Sep 16 2021, 08:50:36)  [Clang 10.0.0 ]
+ numpy:          /Users/travel_mechtal/opt/anaconda3/lib/python3.9/site-packages/numpy
+ numpy_version:  1.22.2
+ 
+ NOTE: Python version was forced by RETICULATE_PYTHON
+
+------------------------------------------------------------------------------
