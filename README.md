@@ -21,7 +21,7 @@ Contains public sector information licensed under the [Open Government Licence v
 
 [Datasets.Rmd](https://github.com/mechtal/Vaccination_UK/blob/main/Datasets.Rmd) is about metrics.
 
-[DatasetSouthWest.Rmd](https://github.com/mechtal/Vaccination_UK/blob/main/DatasetSouthWest.Rmd) and [ModelSouthWest.Rmd](https://github.com/mechtal/Vaccination_UK/blob/main/ModelSouthWest.Rmd) are about the South West's dataset.
+[DatasetSouthWest.Rmd](https://github.com/mechtal/Vaccination_UK/blob/main/DatasetSouthWest.Rmd) and [ModelSouthWest.Rmd](https://github.com/mechtal/Vaccination_UK/blob/main/ModelSouthWest.Rmd) are about the South West's dataset. [ModelSouthWestSessionInfo.log](https://github.com/mechtal/Vaccination_UK/blob/main/ModelSouthWestSessionInfo.log) is session info for ModelSouthWest.Rmd.
 
 [DatasetBristol.Rmd](https://github.com/mechtal/Vaccination_UK/blob/main/DatasetBristol.Rmd) and [ModelBristol.Rmd](https://github.com/mechtal/Vaccination_UK/blob/main/ModelBristol.Rmd) are about the Bristol's dataset.
 
